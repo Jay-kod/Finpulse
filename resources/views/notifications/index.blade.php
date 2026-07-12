@@ -13,7 +13,7 @@
             </p>
         </div>
 
-        @if(auth()->user()->unreadNotifications->count() > 0)
+        @if(auth()->user()->unreadNotifications()->exists())
             <form action="{{ route('notifications.mark-all-read') }}" method="POST">
                 @csrf
                 <x-ui.button type="submit" variant="secondary" class="whitespace-nowrap">

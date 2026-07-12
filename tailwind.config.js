@@ -3,6 +3,7 @@ import forms from '@tailwindcss/forms';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
     content: [
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
@@ -13,6 +14,25 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+            },
+            animation: {
+                'fade-in': 'fadeIn 0.5s ease-out',
+                'slide-up': 'slideUp 0.4s ease-out forwards',
+                'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            keyframes: {
+                fadeIn: {
+                    '0%': { opacity: '0' },
+                    '100%': { opacity: '1' },
+                },
+                slideUp: {
+                    '0%': { opacity: '0', transform: 'translateY(10px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                }
+            },
+            boxShadow: {
+                'glass': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                'glow': '0 0 15px rgba(99, 102, 241, 0.3)',
             },
             colors: {
                 primary: {
@@ -74,6 +94,11 @@ export default {
                     900: 'var(--color-neutral-900, #713F12)',
                 },
                 bg: 'var(--color-bg, #F8FAFC)',
+                dark: {
+                    800: '#1e293b', // slightly softer slate for dark mode cards
+                    900: '#0f172a', // deeper background for dark mode base
+                    950: '#020617', // very deep contrast
+                }
             }
         },
     },

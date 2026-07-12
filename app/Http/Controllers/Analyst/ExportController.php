@@ -45,4 +45,28 @@ class ExportController extends Controller
 
         return $this->exportService->exportReviewsToCsv($query, $filename);
     }
+    /**
+     * Export the filtered reviews associated with a specific report as PDF.
+     */
+    public function exportPdfReport(Report $report)
+    {
+        $filters = $report->parameters ?? [];
+        
+        // Fetch top stats for the PDF header
+        $query = $this->analyticsService->applyFilters(Review::query(), $filters);
+        $totalReviews = $query->count();
+        
+        $clone = clone $query;
+        $avgSentiment = round($clone->avg('sentiment_compound') ?? 0, 2);
+        
+        // Fetch a sample of reviews for the PDF (limit to 100 to avoid massive PDFs)
+        $reviews = $query->with('dataset.fintechApp')->latest('published_at')->limit(100)->get();
+        
+        $safeTitle = preg_replace('/[^a-zA-Z0-9]+/', '_', strtolower($report->title));
+        $filename = 'report_' . $safeTitle . '_' . now()->format('Ymd_His') . '.pdf';
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('analyst.analytics.pdf', compact('report', 'reviews', 'totalReviews', 'avgSentiment'));
+        
+        return $pdf->download($filename);
+    }
 }

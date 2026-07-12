@@ -3,6 +3,13 @@
 @section('title', 'Dashboard')
 
 @push('scripts')
+    <script>
+        window.sentimentTrendsData = @json($sentimentTrends);
+        window.sentimentDistributionData = @json($sentimentDistribution);
+        // Calculate positive percentage for the center of the doughnut chart
+        const total = window.sentimentDistributionData.data.reduce((a, b) => a + b, 0);
+        window.positivePercentage = total > 0 ? Math.round((window.sentimentDistributionData.data[0] / total) * 100) : 0;
+    </script>
     @vite(['resources/js/dashboard.js'])
 @endpush
 
@@ -105,7 +112,7 @@
                 <canvas id="sentimentBreakdownChart"></canvas>
                 {{-- Centered Text inside Doughnut --}}
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-4">
-                    <span class="text-3xl font-bold text-gray-900 dark:text-white">68%</span>
+                    <span id="doughnutCenterText" class="text-3xl font-bold text-gray-900 dark:text-white">68%</span>
                     <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Positive</span>
                 </div>
             </div>

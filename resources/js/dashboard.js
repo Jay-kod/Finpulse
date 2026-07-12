@@ -11,38 +11,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Sentiment Trends Line Chart
     const trendsCanvas = document.getElementById('sentimentTrendsChart');
-    if (trendsCanvas) {
+    if (trendsCanvas && window.sentimentTrendsData) {
         new Chart(trendsCanvas, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                labels: window.sentimentTrendsData.labels.map(date => {
+                    const d = new Date(date);
+                    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                }),
                 datasets: [
                     {
-                        label: 'OPay',
-                        data: [65, 70, 68, 75, 80, 78, 85],
-                        borderColor: '#10b981', // emerald-500
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true,
-                    },
-                    {
-                        label: 'PalmPay',
-                        data: [50, 45, 55, 60, 58, 62, 65],
-                        borderColor: '#f59e0b', // amber-500
-                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true,
-                    },
-                    {
-                        label: 'Kuda',
-                        data: [80, 75, 78, 72, 70, 75, 72],
+                        label: 'Avg Sentiment (%)',
+                        // Convert -1 to 1 score into 0 to 100 percentage
+                        data: window.sentimentTrendsData.data.map(val => val !== null ? Math.round((val + 1) * 50) : null),
                         borderColor: '#6366f1', // indigo-500
                         backgroundColor: 'rgba(99, 102, 241, 0.1)',
                         borderWidth: 2,
                         tension: 0.4,
                         fill: true,
+                        spanGaps: true,
                     }
                 ]
             },
@@ -90,13 +77,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Sentiment Breakdown Doughnut Chart
     const breakdownCanvas = document.getElementById('sentimentBreakdownChart');
-    if (breakdownCanvas) {
+    if (breakdownCanvas && window.sentimentDistributionData) {
+        // Update the center text
+        const centerTextEl = document.getElementById('doughnutCenterText');
+        if (centerTextEl && window.positivePercentage !== undefined) {
+            centerTextEl.innerText = window.positivePercentage + '%';
+        }
+
         new Chart(breakdownCanvas, {
             type: 'doughnut',
             data: {
-                labels: ['Positive', 'Neutral', 'Negative'],
+                labels: window.sentimentDistributionData.labels,
                 datasets: [{
-                    data: [68, 15, 17],
+                    data: window.sentimentDistributionData.data,
                     backgroundColor: [
                         '#10b981', // emerald-500 (Positive)
                         '#9ca3af', // gray-400 (Neutral)

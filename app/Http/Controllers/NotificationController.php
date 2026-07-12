@@ -36,7 +36,7 @@ class NotificationController extends Controller
      */
     public function markAllAsRead(Request $request)
     {
-        $request->user()->unreadNotifications->markAsRead();
+        $request->user()->unreadNotifications()->update(['read_at' => now()]);
         
         return back()->with('success', 'All notifications marked as read.');
     }

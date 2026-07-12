@@ -20,15 +20,49 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
+     * Display the analyst login view.
+     */
+    public function createAnalyst(): View
+    {
+        return view('auth.analyst-login');
+    }
+
+    /**
+     * Display the admin login view.
+     */
+    public function createAdmin(): View
+    {
+        return view('auth.admin-login');
+    }
+
+    /**
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->authenticate('web', 'Viewer');
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('viewer.dashboard', absolute: false));
+    }
+
+    public function storeAnalyst(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate('analyst', 'Analyst');
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('analyst.dashboard', absolute: false));
+    }
+
+    public function storeAdmin(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate('admin', 'Admin');
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('admin.dashboard', absolute: false));
     }
 
     /**
@@ -37,11 +71,30 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-
+        
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect(route('login'));
+    }
+
+    public function destroyAnalyst(Request $request): RedirectResponse
+    {
+        Auth::guard('analyst')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect(route('analyst.login'));
+    }
+
+    public function destroyAdmin(Request $request): RedirectResponse
+    {
+        Auth::guard('admin')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect(route('admin.login'));
     }
 }

@@ -18,6 +18,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
+
+        $middleware->redirectUsersTo(function (Request $request) {
+            if (Auth::guard('admin')->check()) {
+                return route('admin.dashboard', absolute: false);
+            }
+            if (Auth::guard('analyst')->check()) {
+                return route('analyst.dashboard', absolute: false);
+            }
+            return route('dashboard', absolute: false);
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

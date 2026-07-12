@@ -11,7 +11,10 @@
     <div class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('analyst.reports.index') }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                @php
+                    $backRoute = request()->routeIs('viewer.*') ? route('viewer.reports.index') : route('analyst.reports.index');
+                @endphp
+                <a href="{{ $backRoute }}" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $report->title }}</h1>
@@ -35,13 +38,17 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <x-ui.button variant="secondary" href="{{ route('analyst.export.report', $report) }}">
+            @php
+                $csvExportRoute = request()->routeIs('viewer.*') ? route('viewer.export.report', $report) : route('analyst.export.report', $report);
+                $pdfExportRoute = request()->routeIs('viewer.*') ? route('viewer.export.report.pdf', $report) : route('analyst.export.report.pdf', $report);
+            @endphp
+            <x-ui.button variant="secondary" href="{{ $csvExportRoute }}">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Export CSV
             </x-ui.button>
-            <x-ui.button variant="secondary" onclick="window.print()">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Print PDF
+            <x-ui.button variant="secondary" href="{{ $pdfExportRoute }}">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                Export PDF
             </x-ui.button>
         </div>
     </div>

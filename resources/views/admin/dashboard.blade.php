@@ -1,88 +1,91 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard')
+@section('title', 'Admin Dashboard')
 
 @push('scripts')
-    @vite(['resources/js/dashboard.js'])
+    {{-- We use a custom script for admin charts to handle the specific admin data format --}}
+    @vite(['resources/js/admin-dashboard.js'])
+    <script>
+        window.adminDashboardData = {
+            roleCounts: @json($roleCounts),
+            reviewGrowth: @json($reviewGrowth)
+        };
+    </script>
 @endpush
 
 @section('content')
 <div class="max-w-7xl mx-auto">
     {{-- Header --}}
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Welcome back, {{ Auth::user()->name }}! Here's what's happening today.</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Admin Control Center</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Welcome back, {{ Auth::user()->name }}! Here's an overview of the system status.</p>
     </div>
 
     {{-- KPI Cards --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {{-- Total Reviews --}}
+        {{-- Total Users --}}
         <x-ui.card class="flex flex-col justify-between">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Reviews Analyzed</h3>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Users</h3>
+                <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalUsers) }}</div>
+                <div class="mt-2 flex items-center text-sm text-green-600 dark:text-green-400">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    <span>{{ number_format($newUsersThisMonth) }} new</span>
+                    <span class="text-gray-500 dark:text-gray-400 ml-1">this month</span>
+                </div>
+            </div>
+        </x-ui.card>
+
+        {{-- Tracked Apps --}}
+        <x-ui.card class="flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Tracked Apps</h3>
+                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                </div>
+            </div>
+            <div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalApps) }}</div>
+                <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span class="text-emerald-600 dark:text-emerald-400 font-medium mr-1">{{ $activeApps }}</span> active
+                </div>
+            </div>
+        </x-ui.card>
+
+        {{-- Processed Reviews --}}
+        <x-ui.card class="flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Processed Reviews</h3>
                 <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                 </div>
             </div>
             <div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ $kpis['total_reviews']['value'] }}</div>
-                <div class="mt-2 flex items-center text-sm {{ $kpis['total_reviews']['trend_up'] ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $kpis['total_reviews']['trend_up'] ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6' }}"></path></svg>
-                    <span>{{ $kpis['total_reviews']['trend'] }}</span>
-                    <span class="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
-                </div>
-            </div>
-        </x-ui.card>
-
-        {{-- Average Sentiment --}}
-        <x-ui.card class="flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Average Sentiment</h3>
-                <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-            </div>
-            <div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ $kpis['average_sentiment']['value'] }}</div>
-                <div class="mt-2 flex items-center text-sm {{ $kpis['average_sentiment']['trend_up'] ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $kpis['average_sentiment']['trend_up'] ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6' }}"></path></svg>
-                    <span>{{ $kpis['average_sentiment']['trend'] }}</span>
-                    <span class="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
-                </div>
-            </div>
-        </x-ui.card>
-
-        {{-- Active Datasets --}}
-        <x-ui.card class="flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Datasets</h3>
-                <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
-                </div>
-            </div>
-            <div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ $kpis['active_datasets']['value'] }}</div>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalReviews) }}</div>
                 <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
-                    <span>{{ $kpis['active_datasets']['trend'] }}</span>
+                    <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span>System-wide total</span>
                 </div>
             </div>
         </x-ui.card>
 
-        {{-- Anomalies Detected --}}
+        {{-- Audit Events --}}
         <x-ui.card class="flex flex-col justify-between">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Anomalies Detected</h3>
+                <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Audit Events</h3>
                 <div class="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                 </div>
             </div>
             <div>
-                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ $kpis['anomalies_detected']['value'] }}</div>
-                <div class="mt-2 flex items-center text-sm {{ $kpis['anomalies_detected']['trend_up'] ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $kpis['anomalies_detected']['trend_up'] ? 'M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6' : 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' }}"></path></svg>
-                    <span>{{ $kpis['anomalies_detected']['trend'] }}</span>
-                    <span class="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
+                <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalAuditEvents) }}</div>
+                <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <span>Logs recorded</span>
                 </div>
             </div>
         </x-ui.card>
@@ -90,82 +93,125 @@
 
     {{-- Charts Row --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {{-- Line Chart --}}
+        {{-- Line Chart: Review Ingestion Growth --}}
         <x-ui.card class="lg:col-span-2">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sentiment Trends</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Review Ingestion (Last 6 Months)</h3>
             <div class="h-80 w-full relative">
-                <canvas id="sentimentTrendsChart"></canvas>
+                <canvas id="adminGrowthChart"></canvas>
             </div>
         </x-ui.card>
 
-        {{-- Doughnut Chart --}}
+        {{-- Doughnut Chart: Role Distribution --}}
         <x-ui.card>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Overall Breakdown</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">User Roles Breakdown</h3>
             <div class="h-80 w-full relative flex items-center justify-center">
-                <canvas id="sentimentBreakdownChart"></canvas>
+                <canvas id="adminRolesChart"></canvas>
                 {{-- Centered Text inside Doughnut --}}
                 <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-4">
-                    <span class="text-3xl font-bold text-gray-900 dark:text-white">68%</span>
-                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Positive</span>
+                    <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($totalUsers) }}</span>
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Users</span>
                 </div>
             </div>
         </x-ui.card>
     </div>
 
-    {{-- Recent Activity Table --}}
-    <x-ui.card>
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Real-Time Reviews</h3>
-            <x-ui.button tag="a" href="#" variant="ghost" size="sm">View All</x-ui.button>
-        </div>
+    {{-- Tables Row --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         
-        <div class="overflow-x-auto -mx-6">
-            <div class="inline-block min-w-full align-middle">
-                <x-ui.table class="border-t border-gray-200 dark:border-gray-700">
-                    <thead>
-                        <x-ui.table.tr>
-                            <x-ui.table.th>App</x-ui.table.th>
-                            <x-ui.table.th>Review Snippet</x-ui.table.th>
-                            <x-ui.table.th>Sentiment</x-ui.table.th>
-                            <x-ui.table.th>Score</x-ui.table.th>
-                            <x-ui.table.th class="text-right">Time</x-ui.table.th>
-                        </x-ui.table.tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach($recentReviews as $review)
-                        <x-ui.table.tr>
-                            <x-ui.table.td>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ $review['app'] }}</span>
-                            </x-ui.table.td>
-                            <x-ui.table.td>
-                                <div class="max-w-md truncate text-gray-600 dark:text-gray-400" title="{{ $review['text'] }}">
-                                    "{{ $review['text'] }}"
-                                </div>
-                            </x-ui.table.td>
-                            <x-ui.table.td>
-                                <x-ui.badge variant="{{ match($review['sentiment']) {
-                                    'Positive' => 'success',
-                                    'Neutral' => 'secondary',
-                                    'Negative' => 'danger',
-                                    default => 'secondary'
-                                } }}">{{ $review['sentiment'] }}</x-ui.badge>
-                            </x-ui.table.td>
-                            <x-ui.table.td>
-                                <div class="flex items-center">
-                                    <span class="text-sm font-medium {{ $review['score'] > 0.5 ? 'text-green-600 dark:text-green-400' : ($review['score'] < -0.5 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400') }}">
-                                        {{ number_format($review['score'], 2) }}
-                                    </span>
-                                </div>
-                            </x-ui.table.td>
-                            <x-ui.table.td class="text-right text-gray-500 dark:text-gray-400">
-                                {{ $review['date'] }}
-                            </x-ui.table.td>
-                        </x-ui.table.tr>
-                        @endforeach
-                    </tbody>
-                </x-ui.table>
+        {{-- Recent Users Table --}}
+        <x-ui.card>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Users</h3>
+                <x-ui.button tag="a" href="{{ route('admin.users.index') }}" variant="ghost" size="sm">View All</x-ui.button>
             </div>
-        </div>
-    </x-ui.card>
+            
+            <div class="overflow-x-auto -mx-6">
+                <div class="inline-block min-w-full align-middle">
+                    <x-ui.table class="border-t border-gray-200 dark:border-gray-700">
+                        <thead>
+                            <x-ui.table.tr>
+                                <x-ui.table.th>Name</x-ui.table.th>
+                                <x-ui.table.th>Role</x-ui.table.th>
+                                <x-ui.table.th class="text-right">Joined</x-ui.table.th>
+                            </x-ui.table.tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            @foreach($recentUsers as $user)
+                            <x-ui.table.tr>
+                                <x-ui.table.td>
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-700 dark:text-primary-400 font-bold text-xs uppercase mr-3">
+                                            {{ substr($user->name, 0, 1) }}
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
+                                        </div>
+                                    </div>
+                                </x-ui.table.td>
+                                <x-ui.table.td>
+                                    @foreach($user->roles as $role)
+                                        <x-ui.badge variant="{{ match($role->name) {
+                                            'Super Admin', 'Admin' => 'danger',
+                                            'Analyst' => 'primary',
+                                            default => 'secondary'
+                                        } }}">{{ $role->name }}</x-ui.badge>
+                                    @endforeach
+                                </x-ui.table.td>
+                                <x-ui.table.td class="text-right text-gray-500 dark:text-gray-400 text-sm">
+                                    {{ $user->created_at->diffForHumans() }}
+                                </x-ui.table.td>
+                            </x-ui.table.tr>
+                            @endforeach
+                        </tbody>
+                    </x-ui.table>
+                </div>
+            </div>
+        </x-ui.card>
+
+        {{-- Recent Audit Events Table --}}
+        <x-ui.card>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">System Activity</h3>
+                <x-ui.button tag="a" href="{{ route('admin.audit-logs.index') }}" variant="ghost" size="sm">View All</x-ui.button>
+            </div>
+            
+            <div class="overflow-x-auto -mx-6">
+                <div class="inline-block min-w-full align-middle">
+                    <x-ui.table class="border-t border-gray-200 dark:border-gray-700">
+                        <thead>
+                            <x-ui.table.tr>
+                                <x-ui.table.th>User</x-ui.table.th>
+                                <x-ui.table.th>Action</x-ui.table.th>
+                                <x-ui.table.th class="text-right">Time</x-ui.table.th>
+                            </x-ui.table.tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            @foreach($recentAuditEvents as $log)
+                            <x-ui.table.tr>
+                                <x-ui.table.td>
+                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $log->user->name ?? 'System' }}</span>
+                                </x-ui.table.td>
+                                <x-ui.table.td>
+                                    <x-ui.badge variant="{{ match($log->event) {
+                                        'created' => 'success',
+                                        'updated' => 'primary',
+                                        'deleted' => 'danger',
+                                        default => 'secondary'
+                                    } }}">{{ ucfirst($log->event) }}</x-ui.badge>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">on {{ class_basename($log->auditable_type) }}</span>
+                                </x-ui.table.td>
+                                <x-ui.table.td class="text-right text-gray-500 dark:text-gray-400 text-sm">
+                                    {{ $log->created_at->diffForHumans() }}
+                                </x-ui.table.td>
+                            </x-ui.table.tr>
+                            @endforeach
+                        </tbody>
+                    </x-ui.table>
+                </div>
+            </div>
+        </x-ui.card>
+
+    </div>
 </div>
 @endsection

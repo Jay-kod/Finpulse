@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     <title>{{ config('app.name', 'Sentiment Analysis') }} @yield('title')</title>
 
@@ -24,14 +25,14 @@
             --color-positive: {{ $themeColors->get('theme_positive', '#16A34A') }};
             --color-negative: {{ $themeColors->get('theme_negative', '#DC2626') }};
             --color-neutral: {{ $themeColors->get('theme_neutral', '#CA8A04') }};
-            --color-bg: {{ $themeColors->get('theme_bg', '#F8FAFC') }};
+            --color-bg: {{ $themeColors->get('theme_bg', '#F3F4F6') }};
         }
     </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-bg text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-200">
-    <div class="min-h-full flex" x-data="{ sidebarOpen: false }">
+<body class="h-full bg-bg text-gray-900 dark:bg-dark-950 dark:text-gray-100 transition-colors duration-200">
+    <div class="min-h-full flex" x-data="{ sidebarOpen: false, desktopSidebarOpen: localStorage.getItem('desktopSidebarOpen') !== 'false' }" x-init="$watch('desktopSidebarOpen', val => localStorage.setItem('desktopSidebarOpen', val))">
         <!-- Sidebar -->
         @include('layouts.partials.sidebar')
 
@@ -49,8 +50,6 @@
                 @yield('content')
             </main>
 
-            <!-- Footer -->
-            @include('layouts.partials.footer')
         </div>
     </div>
     <x-ui.toast />

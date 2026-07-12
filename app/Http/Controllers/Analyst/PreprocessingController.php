@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Analyst;
 
 use App\Http\Controllers\Controller;
 use App\Models\Review;
+use App\Notifications\PipelineCompletedNotification;
 use App\Services\NlpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -52,6 +53,9 @@ class PreprocessingController extends Controller
         Artisan::call('reviews:preprocess', ['--limit' => $limit]);
 
         $output = Artisan::output();
+        $count = $this->extractProcessedCount($output, $limit);
+
+        $request->user()->notify(new PipelineCompletedNotification(0, 'NLP Preprocessing', $count));
 
         return redirect()->route('analyst.preprocessing.index')
             ->with('success', "Preprocessing dispatched. {$output}");
@@ -67,6 +71,9 @@ class PreprocessingController extends Controller
         Artisan::call('reviews:classify', ['--limit' => $limit]);
 
         $output = Artisan::output();
+        $count = $this->extractProcessedCount($output, $limit);
+
+        $request->user()->notify(new PipelineCompletedNotification(0, 'ML Classification', $count));
 
         return redirect()->route('analyst.preprocessing.index')
             ->with('success', "ML Classification dispatched. {$output}");
@@ -82,8 +89,23 @@ class PreprocessingController extends Controller
         Artisan::call('reviews:sentiment', ['--limit' => $limit]);
 
         $output = Artisan::output();
+        $count = $this->extractProcessedCount($output, $limit);
+
+        $request->user()->notify(new PipelineCompletedNotification(0, 'Sentiment Analysis', $count));
 
         return redirect()->route('analyst.preprocessing.index')
             ->with('success', "Sentiment Analysis dispatched. {$output}");
     }
+
+    /**
+     * Extract the number of processed records from artisan output.
+     */
+    private function extractProcessedCount(string $output, int $fallback): int
+    {
+        if (preg_match('/(\d+)\s+record/i', $output, $matches)) {
+            return (int) $matches[1];
+        }
+        return $fallback;
+    }
 }
+

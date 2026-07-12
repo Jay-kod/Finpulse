@@ -35,6 +35,7 @@ class AppDirectoryController extends Controller
         $neutralReviews = $totalReviews - $goodReviews - $badReviews;
 
         $recentReviews = $app->reviews()
+            ->with('dataset')
             ->latest('published_at')
             ->take(10)
             ->get();
@@ -46,6 +47,97 @@ class AppDirectoryController extends Controller
             'badReviews', 
             'neutralReviews', 
             'recentReviews'
+        ));
+    }
+
+    /**
+     * Display a paginated, filterable listing of reviews for a Fintech App.
+     */
+    public function reviews(Request $request, FintechApp $app): View
+    {
+        $query = $app->reviews()->with('dataset.fintechApp');
+
+        // Filter by star rating
+        if ($request->filled('rating')) {
+            $query->where('rating', $request->input('rating'));
+        }
+
+        // Filter by sentiment (based on compound score)
+        if ($request->filled('sentiment')) {
+            match ($request->input('sentiment')) {
+                'positive' => $query->where('sentiment_compound', '>', 0.05),
+                'negative' => $query->where('sentiment_compound', '<', -0.05),
+                'neutral'  => $query->whereBetween('sentiment_compound', [-0.05, 0.05]),
+                default    => null,
+            };
+        }
+
+        // Filter by topic
+        if ($request->filled('topic')) {
+            $query->where('topic', $request->input('topic'));
+        }
+
+        // Filter by source (dataset source)
+        if ($request->filled('source')) {
+            $query->whereHas('dataset', function ($q) use ($request) {
+                $q->where('source', $request->input('source'));
+            });
+        }
+
+        // Filter by bug reports only
+        if ($request->boolean('bugs_only')) {
+            $query->where('is_bug', true);
+        }
+
+        // Search by content
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('content', 'like', "%{$search}%")
+                  ->orWhere('author_name', 'like', "%{$search}%");
+            });
+        }
+
+        // Sorting
+        $sortField = $request->input('sort', 'published_at');
+        $sortDir = $request->input('dir', 'desc');
+        $allowedSorts = ['published_at', 'rating', 'sentiment_compound', 'word_count'];
+        if (!in_array($sortField, $allowedSorts)) {
+            $sortField = 'published_at';
+        }
+        $sortDir = $sortDir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortField, $sortDir);
+
+        $reviews = $query->paginate(20)->withQueryString();
+
+        // Get available topics for filter dropdown
+        $topics = $app->reviews()
+            ->whereNotNull('topic')
+            ->distinct()
+            ->pluck('topic')
+            ->sort()
+            ->values();
+
+        // Get available sources for filter dropdown
+        $sources = $app->datasets()
+            ->distinct()
+            ->pluck('source')
+            ->sort()
+            ->values();
+
+        // Stats for the header
+        $totalReviews = $app->reviews()->count();
+        $avgRating = $app->reviews()->avg('rating');
+        $bugCount = $app->reviews()->where('is_bug', true)->count();
+
+        return view('viewer.apps.reviews', compact(
+            'app',
+            'reviews',
+            'topics',
+            'sources',
+            'totalReviews',
+            'avgRating',
+            'bugCount',
         ));
     }
 }

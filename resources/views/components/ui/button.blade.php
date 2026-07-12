@@ -3,7 +3,8 @@
     'variant' => 'primary', // primary, secondary, danger, outline, ghost
     'size' => 'md', // sm, md, lg
     'block' => false,
-    'disabled' => false
+    'disabled' => false,
+    'tag' => null,
 ])
 
 @php
@@ -24,12 +25,15 @@
     };
 
     $blockClass = $block ? 'w-full' : '';
+    
+    $isLink = $tag === 'a' || $attributes->has('href');
+    $element = $isLink ? 'a' : 'button';
 @endphp
 
-<button 
-    type="{{ $type }}" 
+<{{ $element }}
+    @if(!$isLink) type="{{ $type }}" @endif
     {{ $disabled ? 'disabled' : '' }}
     {{ $attributes->merge(['class' => "{$baseClasses} {$sizeClasses} {$variantClasses} {$blockClass}"]) }}
 >
     {{ $slot }}
-</button>
+</{{ $element }}>

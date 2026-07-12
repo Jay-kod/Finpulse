@@ -28,81 +28,103 @@ class DashboardController extends Controller
 
     public function adminDashboard(Request $request): View
     {
-        return view('admin.dashboard', $this->getMockData());
+        $totalUsers = \App\Models\User::count();
+        $newUsersThisMonth = \App\Models\User::where('created_at', '>=', now()->startOfMonth())->count();
+        $totalApps = \App\Models\FintechApp::count();
+        $activeApps = \App\Models\FintechApp::where('is_active', true)->count();
+        $totalReviews = \App\Models\Review::count();
+        $totalAuditEvents = \App\Models\AuditLog::count();
+        $recentAuditEvents = \App\Models\AuditLog::with('user')->latest()->limit(5)->get();
+        $recentUsers = \App\Models\User::latest()->limit(5)->get();
+
+        // Role distribution for doughnut chart
+        $roleCounts = [];
+        foreach (\Spatie\Permission\Models\Role::all() as $role) {
+            $roleCounts[$role->name] = $role->users()->count();
+        }
+
+        // Review growth over last 6 months for line chart
+        $reviewGrowth = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $reviewGrowth[] = [
+                'month' => $date->format('M'),
+                'count' => \App\Models\Review::whereYear('created_at', $date->year)
+                    ->whereMonth('created_at', $date->month)
+                    ->count(),
+            ];
+        }
+
+        return view('admin.dashboard', compact(
+            'totalUsers', 'newUsersThisMonth', 'totalApps', 'activeApps',
+            'totalReviews', 'totalAuditEvents', 'recentAuditEvents',
+            'recentUsers', 'roleCounts', 'reviewGrowth'
+        ));
     }
 
-    public function analystDashboard(Request $request): View
+    public function analystDashboard(Request $request, \App\Services\AnalyticsService $analytics): View
     {
-        return view('analyst.dashboard', $this->getMockData());
+        return view('analyst.dashboard', $this->getDashboardData($analytics));
     }
 
-    public function viewerDashboard(Request $request): View
+    public function viewerDashboard(Request $request, \App\Services\AnalyticsService $analytics): View
     {
-        return view('viewer.dashboard', $this->getMockData());
+        return view('viewer.dashboard', $this->getDashboardData($analytics));
     }
 
-    private function getMockData(): array
+    private function getDashboardData(\App\Services\AnalyticsService $analytics): array
     {
+        $overview = $analytics->getOverviewStats();
+        
+        $activeDatasets = \App\Models\Dataset::where('status', 'completed')->count();
+
+        // Get 5 most recent analyzed reviews
+        $recentReviewsData = \App\Models\Review::with('dataset.fintechApp')
+            ->where('sentiment_status', 'analyzed')
+            ->latest('published_at')
+            ->limit(5)
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'app' => $review->dataset->fintechApp->name ?? 'Unknown',
+                    'text' => $review->content,
+                    'sentiment' => match (true) {
+                        $review->sentiment_compound >= 0.05 => 'Positive',
+                        $review->sentiment_compound <= -0.05 => 'Negative',
+                        default => 'Neutral',
+                    },
+                    'score' => $review->sentiment_compound,
+                    'date' => $review->published_at ? $review->published_at->diffForHumans() : $review->created_at->diffForHumans(),
+                ];
+            })
+            ->toArray();
+
         return [
             'kpis' => [
                 'total_reviews' => [
-                    'value' => '124,592',
-                    'trend' => '+12.5%',
+                    'value' => number_format($overview['total_reviews']),
+                    'trend' => 'Real-time',
                     'trend_up' => true,
                 ],
                 'average_sentiment' => [
-                    'value' => '68%',
-                    'trend' => '+2.1%',
-                    'trend_up' => true,
+                    'value' => $overview['avg_sentiment'] > 0 ? '+' . number_format($overview['avg_sentiment'], 2) : number_format($overview['avg_sentiment'], 2),
+                    'trend' => 'Overall Score',
+                    'trend_up' => $overview['avg_sentiment'] >= 0,
                 ],
                 'active_datasets' => [
-                    'value' => '3',
-                    'trend' => 'No change',
+                    'value' => number_format($activeDatasets),
+                    'trend' => 'Processed sources',
                     'trend_up' => null,
                 ],
                 'anomalies_detected' => [
-                    'value' => '14',
-                    'trend' => '-5',
-                    'trend_up' => true,
+                    'value' => number_format($overview['bug_rate'], 1) . '%',
+                    'trend' => 'Bug report rate',
+                    'trend_up' => false,
                 ],
             ],
-            'recentReviews' => [
-                [
-                    'app' => 'OPay',
-                    'text' => 'The app is very fast and reliable for transfers.',
-                    'sentiment' => 'Positive',
-                    'score' => 0.92,
-                    'date' => now()->subMinutes(12)->diffForHumans(),
-                ],
-                [
-                    'app' => 'PalmPay',
-                    'text' => 'Customer service is not responding to my missing funds.',
-                    'sentiment' => 'Negative',
-                    'score' => -0.85,
-                    'date' => now()->subMinutes(45)->diffForHumans(),
-                ],
-                [
-                    'app' => 'Kuda',
-                    'text' => 'It works fine but sometimes the network is down.',
-                    'sentiment' => 'Neutral',
-                    'score' => 0.10,
-                    'date' => now()->subHours(2)->diffForHumans(),
-                ],
-                [
-                    'app' => 'OPay',
-                    'text' => 'I love the cashback features!',
-                    'sentiment' => 'Positive',
-                    'score' => 0.88,
-                    'date' => now()->subHours(3)->diffForHumans(),
-                ],
-                [
-                    'app' => 'Kuda',
-                    'text' => 'Card delivery took way too long.',
-                    'sentiment' => 'Negative',
-                    'score' => -0.65,
-                    'date' => now()->subHours(5)->diffForHumans(),
-                ],
-            ]
+            'recentReviews' => $recentReviewsData,
+            'sentimentDistribution' => $analytics->getSentimentDistribution(),
+            'sentimentTrends' => $analytics->getSentimentOverTime(14),
         ];
     }
 }

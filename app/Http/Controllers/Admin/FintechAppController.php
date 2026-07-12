@@ -52,9 +52,10 @@ class FintechAppController extends Controller
         // Dispatch background job to sync initial reviews
         SyncAppReviewsJob::dispatch($app);
 
-        // Notify all users in the system
-        $allUsers = User::all();
-        Notification::send($allUsers, new NewFintechAppAdded($app));
+        // Notify all users in the system (chunked to avoid memory exhaustion)
+        User::chunk(100, function ($users) use ($app) {
+            Notification::send($users, new NewFintechAppAdded($app));
+        });
 
         return redirect()->route('admin.fintech-apps.index')
             ->with('success', 'Fintech Application created successfully. Initial sync has started.');

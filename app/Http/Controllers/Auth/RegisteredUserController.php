@@ -46,8 +46,40 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        return redirect()->route('login')->with('status', 'Account created successfully! Please log in.');
+    }
 
-        return redirect(route('dashboard', absolute: false));
+    /**
+     * Display the analyst registration view.
+     */
+    public function createAnalyst(): View
+    {
+        return view('auth.analyst-register');
+    }
+
+    /**
+     * Handle an incoming analyst registration request.
+     *
+     * @throws ValidationException
+     */
+    public function storeAnalyst(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $user->assignRole('Analyst');
+
+        event(new Registered($user));
+
+        return redirect()->route('analyst.login')->with('status', 'Account created successfully! Please log in.');
     }
 }

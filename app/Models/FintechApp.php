@@ -16,6 +16,7 @@ class FintechApp extends Model
         'package_name',
         'playstore_id',
         'appstore_id',
+        'twitter_handle',
         'platform',
         'downloads',
         'average_rating',

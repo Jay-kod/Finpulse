@@ -27,23 +27,23 @@ class DatasetController extends Controller
         return view('analyst.datasets.create', compact('apps'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'fintech_app_id' => 'required|exists:fintech_apps,id',
             'name' => 'required|string|max:255',
             'source' => 'required|string|max:255',
-            'status' => 'required|in:pending,processing,completed,failed',
-            'record_count' => 'required|integer|min:0',
         ]);
 
-        Dataset::create($validated);
+        $dataset = Dataset::create(array_merge($validated, [
+            'status' => 'pending',
+            'record_count' => 0,
+        ]));
+
+        \App\Jobs\ProcessDatasetImportJob::dispatch($dataset);
 
         return redirect()->route('analyst.datasets.index')
-            ->with('success', 'Dataset registered successfully.');
+            ->with('success', 'Dataset registered! Live data extraction has been initiated in the background.');
     }
 
     /**
@@ -55,17 +55,12 @@ class DatasetController extends Controller
         return view('analyst.datasets.edit', compact('dataset', 'apps'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Dataset $dataset)
     {
         $validated = $request->validate([
             'fintech_app_id' => 'required|exists:fintech_apps,id',
             'name' => 'required|string|max:255',
             'source' => 'required|string|max:255',
-            'status' => 'required|in:pending,processing,completed,failed',
-            'record_count' => 'required|integer|min:0',
         ]);
 
         $dataset->update($validated);

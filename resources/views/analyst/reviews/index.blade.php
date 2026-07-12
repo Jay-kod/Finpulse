@@ -36,7 +36,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($reviews as $review)
-                            <x-ui.table.tr>
+                            <x-ui.table.tr x-data="{ expanded: false }">
                                 <x-ui.table.td>
                                     <div class="flex flex-col">
                                         <span class="font-medium text-gray-900 dark:text-white">{{ $review->dataset->fintechApp->name ?? 'Unknown App' }}</span>
@@ -46,8 +46,15 @@
                                     </div>
                                 </x-ui.table.td>
                                 <x-ui.table.td>
-                                    <div class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 max-w-xs" title="{{ $review->content }}">
-                                        {{ $review->content }}
+                                    <div class="max-w-md">
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 cursor-pointer" :class="expanded ? '' : 'line-clamp-2'" @click="expanded = !expanded">
+                                            {{ $review->content }}
+                                        </p>
+                                        @if(Str::length($review->content) > 80)
+                                        <button @click="expanded = !expanded" class="mt-1 text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                                            <span x-text="expanded ? '▲ Show less' : '▼ Show more'"></span>
+                                        </button>
+                                        @endif
                                     </div>
                                 </x-ui.table.td>
                                 <x-ui.table.td>
@@ -63,7 +70,11 @@
                                         default => 'warning'
                                     } }}">{{ ucfirst($review->processed_status) }}</x-ui.badge>
                                 </x-ui.table.td>
-                                <x-ui.table.td class="text-right whitespace-nowrap text-sm font-medium space-x-3">
+                                <x-ui.table.td class="text-right whitespace-nowrap text-sm font-medium space-x-2">
+                                    <a href="{{ route('analyst.predictions.index') }}?text={{ urlencode($review->content) }}" class="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300" title="Predict this review">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        Predict
+                                    </a>
                                     <a href="{{ route('analyst.reviews.edit', $review) }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300">Edit</a>
                                     <form action="{{ route('analyst.reviews.destroy', $review) }}" method="POST" class="inline-block" x-data @submit.prevent="$dispatch('open-confirm', { message: 'Are you sure you want to delete this review?', confirm: () => $el.submit() })">
                                         @csrf

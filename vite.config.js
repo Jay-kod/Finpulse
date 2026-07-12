@@ -8,7 +8,8 @@ export default defineConfig({
                 'resources/css/app.css', 
                 'resources/js/app.js', 
                 'resources/js/dashboard.js',
-                'resources/js/analytics.js'
+                'resources/js/analytics.js',
+                'resources/js/admin-dashboard.js'
             ],
             refresh: true,
         }),

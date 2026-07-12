@@ -1,18 +1,18 @@
-<header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+<header class="h-16 bg-white/80 dark:bg-dark-900/80 backdrop-blur-xl border-b border-gray-200/60 dark:border-dark-800/80 flex items-center justify-between px-4 sm:px-6 lg:px-8 transition-colors duration-200 sticky top-0 z-30 shadow-sm dark:shadow-glass">
     <div class="flex items-center">
         <!-- Mobile menu button -->
         <button @click="sidebarOpen = true" class="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
         
-        <!-- Search Form -->
+        <!-- Desktop menu button -->
+        <button @click="desktopSidebarOpen = !desktopSidebarOpen" class="hidden md:block p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        
+        <!-- Page Title -->
         <div class="hidden sm:block ml-4">
-            <form action="{{ route('search') }}" method="GET" class="relative rounded-md shadow-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <input type="search" name="q" value="{{ request('q') }}" class="form-input block w-full pl-10 sm:text-sm sm:leading-5 rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 transition-colors" placeholder="Search...">
-            </form>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">@yield('title')</h2>
         </div>
     </div>
 
@@ -25,7 +25,7 @@
 
         <!-- Notifications Bell -->
         @php
-            $unreadCount = auth()->check() ? auth()->user()->unreadNotifications->count() : 0;
+            $unreadCount = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0;
         @endphp
         <a href="{{ route('notifications.index') }}" class="relative p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" id="topbar-notification-bell">
             <span class="sr-only">View notifications</span>
@@ -64,7 +64,17 @@
                 </div>
                 <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">Profile Settings</a>
                 
-                <form method="POST" action="{{ route('logout') }}">
+                @php
+                    $logoutRoute = route('logout');
+                    if (Auth::check()) {
+                        if (Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('Admin')) {
+                            $logoutRoute = route('admin.logout');
+                        } elseif (Auth::user()->hasRole('Analyst')) {
+                            $logoutRoute = route('analyst.logout');
+                        }
+                    }
+                @endphp
+                <form method="POST" action="{{ $logoutRoute }}">
                     @csrf
                     <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                         Sign out
