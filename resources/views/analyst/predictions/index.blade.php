@@ -32,6 +32,17 @@
                     </h2>
                 </div>
                 <div class="p-5 space-y-4">
+                    {{-- Source Selection --}}
+                    <div class="mb-4">
+                        <label for="review-source" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Review Source</label>
+                        <select id="review-source" x-model="source" class="w-full sm:w-1/2 rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500 text-sm">
+                            <option value="Google Play">Google Play Store</option>
+                            <option value="App Store">Apple App Store</option>
+                            <option value="X (Twitter)">X (Twitter)</option>
+                            <option value="Other">Other / Web</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label for="review-text" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Paste or type a review</label>
                         <textarea
@@ -242,6 +253,7 @@
                                         <div class="min-w-0 flex-1">
                                             <p class="text-sm text-gray-700 dark:text-gray-300 truncate" x-text="item.original_text"></p>
                                             <p class="text-xs text-gray-400 mt-0.5">
+                                                <span x-text="item.source" class="font-medium text-gray-500 dark:text-gray-300"></span> · 
                                                 <span x-text="item.classification.topic || 'N/A'"></span> · 
                                                 <span x-text="'Compound: ' + item.sentiment.compound.toFixed(2)"></span>
                                             </p>
@@ -261,6 +273,7 @@
 <script>
 function predictionsLab() {
     return {
+        source: 'Google Play',
         inputText: '',
         loading: false,
         result: null,
@@ -271,6 +284,10 @@ function predictionsLab() {
             // Auto-fill from ?text= query parameter (e.g., when clicking "Predict" from Reviews)
             const params = new URLSearchParams(window.location.search);
             const prefill = params.get('text');
+            const prefillSource = params.get('source');
+            if (prefillSource) {
+                this.source = prefillSource;
+            }
             if (prefill && prefill.trim().length >= 5) {
                 this.inputText = prefill;
                 // Auto-trigger analysis after a short delay
@@ -315,6 +332,8 @@ function predictionsLab() {
                 const data = await response.json();
 
                 if (data.success) {
+                    // Inject source into the result object so we can show it in history
+                    data.data.source = this.source;
                     this.result = data.data;
                     // Add to history (most recent first)
                     this.history.unshift(data.data);

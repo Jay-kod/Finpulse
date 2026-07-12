@@ -40,8 +40,9 @@
                                 <x-ui.table.td>
                                     <div class="flex flex-col">
                                         <span class="font-medium text-gray-900 dark:text-white">{{ $review->dataset->fintechApp->name ?? 'Unknown App' }}</span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[150px]" title="{{ $review->dataset->name ?? 'Unknown Dataset' }}">
-                                            {{ $review->dataset->name ?? 'Unknown Dataset' }}
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1">
+                                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                                            {{ $review->dataset->source ?? 'Unknown Source' }}
                                         </span>
                                     </div>
                                 </x-ui.table.td>
@@ -71,7 +72,7 @@
                                     } }}">{{ ucfirst($review->processed_status) }}</x-ui.badge>
                                 </x-ui.table.td>
                                 <x-ui.table.td class="text-right whitespace-nowrap text-sm font-medium space-x-2">
-                                    <a href="{{ route('analyst.predictions.index') }}?text={{ urlencode($review->content) }}" class="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300" title="Predict this review">
+                                    <a href="{{ route('analyst.predictions.index') }}?text={{ urlencode($review->content) }}&source={{ urlencode($review->dataset->source ?? '') }}" class="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300" title="Predict this review">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                         Predict
                                     </a>

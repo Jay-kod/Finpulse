@@ -36,6 +36,7 @@ Route::middleware('auth:web,analyst,admin')->group(function () {
 // --- VIEWER ROUTES ---
 Route::middleware(['auth:web,analyst,admin'])->prefix('viewer')->name('viewer.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'viewerDashboard'])->name('dashboard');
+    Route::get('/analytics', [\App\Http\Controllers\Analyst\AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/reports', [\App\Http\Controllers\Analyst\ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/{report}', [\App\Http\Controllers\Analyst\ReportController::class, 'show'])->name('reports.show');
     

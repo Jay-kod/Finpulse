@@ -12,6 +12,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Sentiment Trends Line Chart
     const trendsCanvas = document.getElementById('sentimentTrendsChart');
     if (trendsCanvas && window.sentimentTrendsData) {
+        // Define a palette of nice colors for the different apps
+        const colors = [
+            { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' }, // Indigo
+            { border: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' }, // Emerald
+            { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' }, // Amber
+            { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)' }, // Pink
+            { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' }, // Blue
+            { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' }, // Violet
+        ];
+
+        let datasets = [];
+        
+        // Check if data is new format (per app) or old format
+        if (window.sentimentTrendsData.datasets) {
+            datasets = window.sentimentTrendsData.datasets.map((ds, index) => {
+                const color = colors[index % colors.length];
+                return {
+                    label: ds.label + ' Sentiment (%)',
+                    data: ds.data.map(val => val !== null ? Math.round((val + 1) * 50) : null),
+                    borderColor: color.border,
+                    backgroundColor: color.bg,
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: false, // Don't fill when there are multiple lines to prevent visual clutter
+                    spanGaps: true,
+                };
+            });
+        } else {
+            // Fallback for old format
+            datasets = [{
+                label: 'Avg Sentiment (%)',
+                data: window.sentimentTrendsData.data.map(val => val !== null ? Math.round((val + 1) * 50) : null),
+                borderColor: colors[0].border,
+                backgroundColor: colors[0].bg,
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                spanGaps: true,
+            }];
+        }
+
         new Chart(trendsCanvas, {
             type: 'line',
             data: {
@@ -19,19 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const d = new Date(date);
                     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 }),
-                datasets: [
-                    {
-                        label: 'Avg Sentiment (%)',
-                        // Convert -1 to 1 score into 0 to 100 percentage
-                        data: window.sentimentTrendsData.data.map(val => val !== null ? Math.round((val + 1) * 50) : null),
-                        borderColor: '#6366f1', // indigo-500
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true,
-                        spanGaps: true,
-                    }
-                ]
+                datasets: datasets
             },
             options: {
                 responsive: true,

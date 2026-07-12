@@ -7,21 +7,24 @@
     // Determine which dashboard to point to
     if ($user && $user->hasRole(['Super Admin', 'Admin'])) {
         $dashboardUrl = '/admin/dashboard';
+        $analyticsUrl = '/analyst/analytics';
         $reportsUrl = '/analyst/reports';
         $appsUrl = '/admin/apps';
     } elseif ($user && $user->hasRole('Analyst')) {
         $dashboardUrl = '/analyst/dashboard';
+        $analyticsUrl = '/analyst/analytics';
         $reportsUrl = '/analyst/reports';
         $appsUrl = '/analyst/apps';
     } else {
         $dashboardUrl = '/viewer/dashboard';
+        $analyticsUrl = '/viewer/analytics';
         $reportsUrl = '/viewer/reports';
         $appsUrl = '/viewer/apps';
     }
 
     $navItems = [
         ['label' => 'Dashboard', 'url' => $dashboardUrl, 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'roles' => ['Super Admin', 'Admin', 'Analyst', 'Viewer']],
-        ['label' => 'Analytics', 'url' => '/analyst/analytics', 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'roles' => ['Super Admin', 'Admin', 'Analyst']],
+        ['label' => 'Analytics', 'url' => $analyticsUrl, 'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', 'roles' => ['Super Admin', 'Admin', 'Analyst', 'Viewer']],
         ['label' => 'Datasets', 'url' => '/analyst/datasets', 'icon' => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4', 'roles' => ['Super Admin', 'Admin', 'Analyst']],
         ['label' => 'Reviews', 'url' => '/analyst/reviews', 'icon' => 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z', 'roles' => ['Super Admin', 'Admin', 'Analyst']],
         ['label' => 'Predictions', 'url' => '/analyst/predictions', 'icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 'roles' => ['Super Admin', 'Admin', 'Analyst']],

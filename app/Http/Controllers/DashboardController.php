@@ -28,38 +28,43 @@ class DashboardController extends Controller
 
     public function adminDashboard(Request $request): View
     {
-        $totalUsers = \App\Models\User::count();
-        $newUsersThisMonth = \App\Models\User::where('created_at', '>=', now()->startOfMonth())->count();
-        $totalApps = \App\Models\FintechApp::count();
-        $activeApps = \App\Models\FintechApp::where('is_active', true)->count();
-        $totalReviews = \App\Models\Review::count();
-        $totalAuditEvents = \App\Models\AuditLog::count();
-        $recentAuditEvents = \App\Models\AuditLog::with('user')->latest()->limit(5)->get();
-        $recentUsers = \App\Models\User::latest()->limit(5)->get();
+        $data = \Illuminate\Support\Facades\Cache::remember('admin.dashboard.data', now()->addMinutes(15), function () {
+            $totalUsers = \App\Models\User::count();
+            $newUsersThisMonth = \App\Models\User::where('created_at', '>=', now()->startOfMonth())->count();
+            $totalApps = \App\Models\FintechApp::count();
+            $activeApps = \App\Models\FintechApp::where('is_active', true)->count();
+            $totalReviews = \App\Models\Review::count();
+            $totalAuditEvents = \App\Models\AuditLog::count();
+            $recentAuditEvents = \App\Models\AuditLog::with('user')->latest()->limit(5)->get();
+            $recentUsers = \App\Models\User::latest()->limit(5)->get();
 
-        // Role distribution for doughnut chart
-        $roleCounts = [];
-        foreach (\Spatie\Permission\Models\Role::all() as $role) {
-            $roleCounts[$role->name] = $role->users()->count();
-        }
+            // Role distribution for doughnut chart
+            $roleCounts = [];
+            $roles = \Spatie\Permission\Models\Role::withCount('users')->get();
+            foreach ($roles as $role) {
+                $roleCounts[$role->name] = $role->users_count;
+            }
 
-        // Review growth over last 6 months for line chart
-        $reviewGrowth = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $date = now()->subMonths($i);
-            $reviewGrowth[] = [
-                'month' => $date->format('M'),
-                'count' => \App\Models\Review::whereYear('created_at', $date->year)
-                    ->whereMonth('created_at', $date->month)
-                    ->count(),
-            ];
-        }
+            // Review growth over last 6 months for line chart
+            $reviewGrowth = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $date = now()->subMonths($i);
+                $reviewGrowth[] = [
+                    'month' => $date->format('M'),
+                    'count' => \App\Models\Review::whereYear('created_at', $date->year)
+                        ->whereMonth('created_at', $date->month)
+                        ->count(),
+                ];
+            }
 
-        return view('admin.dashboard', compact(
-            'totalUsers', 'newUsersThisMonth', 'totalApps', 'activeApps',
-            'totalReviews', 'totalAuditEvents', 'recentAuditEvents',
-            'recentUsers', 'roleCounts', 'reviewGrowth'
-        ));
+            return compact(
+                'totalUsers', 'newUsersThisMonth', 'totalApps', 'activeApps',
+                'totalReviews', 'totalAuditEvents', 'recentAuditEvents',
+                'recentUsers', 'roleCounts', 'reviewGrowth'
+            );
+        });
+
+        return view('admin.dashboard', $data);
     }
 
     public function analystDashboard(Request $request, \App\Services\AnalyticsService $analytics): View
@@ -78,16 +83,32 @@ class DashboardController extends Controller
         
         $activeDatasets = \App\Models\Dataset::where('status', 'completed')->count();
 
-        // Get 5 most recent analyzed reviews
-        $recentReviewsData = \App\Models\Review::with('dataset.fintechApp')
-            ->where('sentiment_status', 'analyzed')
-            ->latest('published_at')
-            ->limit(5)
-            ->get()
+        // Get recent reviews spread across ALL apps (not just one)
+        $apps = \App\Models\FintechApp::where('is_active', true)->get();
+        $recentReviewsData = collect();
+
+        foreach ($apps as $app) {
+            $appReviews = \App\Models\Review::with('dataset.fintechApp')
+                ->whereHas('dataset', function ($q) use ($app) {
+                    $q->where('fintech_app_id', $app->id);
+                })
+                ->where('sentiment_status', 'analyzed')
+                ->latest('published_at')
+                ->limit(2)
+                ->get();
+
+            $recentReviewsData = $recentReviewsData->merge($appReviews);
+        }
+
+        $recentReviewsData = $recentReviewsData
+            ->sortByDesc('published_at')
+            ->take(10)
             ->map(function ($review) {
                 return [
                     'app' => $review->dataset->fintechApp->name ?? 'Unknown',
                     'text' => $review->content,
+                    'source' => $review->source ?? 'google_play',
+                    'rating' => $review->rating ?? null,
                     'sentiment' => match (true) {
                         $review->sentiment_compound >= 0.05 => 'Positive',
                         $review->sentiment_compound <= -0.05 => 'Negative',
@@ -97,6 +118,7 @@ class DashboardController extends Controller
                     'date' => $review->published_at ? $review->published_at->diffForHumans() : $review->created_at->diffForHumans(),
                 ];
             })
+            ->values()
             ->toArray();
 
         return [
@@ -124,7 +146,7 @@ class DashboardController extends Controller
             ],
             'recentReviews' => $recentReviewsData,
             'sentimentDistribution' => $analytics->getSentimentDistribution(),
-            'sentimentTrends' => $analytics->getSentimentOverTime(14),
+            'sentimentTrends' => $analytics->getSentimentTrendsPerApp(14),
         ];
     }
 }

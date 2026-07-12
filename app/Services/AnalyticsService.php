@@ -192,18 +192,83 @@ class AnalyticsService
     }
 
     /**
-     * Get the 10 most recent reviews flagged as bugs.
+     * Get average sentiment over time per active app.
+     */
+    public function getSentimentTrendsPerApp(int $days = 30, array $filters = []): array
+    {
+        $cacheKey = $this->getCacheKey("sentiment_time_per_app_{$days}", $filters);
+        
+        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($days, $filters) {
+            $baseQuery = $this->applyFilters(Review::query(), $filters);
+
+            if (empty($filters['start_date'])) {
+                $startDate = now()->subDays($days)->startOfDay();
+                $baseQuery->where('published_at', '>=', $startDate);
+            } else {
+                $startDate = \Carbon\Carbon::parse($filters['start_date']);
+                $endDate = empty($filters['end_date']) ? now() : \Carbon\Carbon::parse($filters['end_date']);
+                $days = (int) $startDate->diffInDays($endDate) + 1;
+            }
+
+            // Get all active apps
+            $apps = \App\Models\FintechApp::where('is_active', true)->get();
+            $datasets = [];
+
+            // Pre-calculate the timeline labels
+            $labels = [];
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $dateObj = (empty($filters['end_date']) ? now() : \Carbon\Carbon::parse($filters['end_date']))->subDays($i);
+                $labels[] = $dateObj->format('Y-m-d');
+            }
+
+            foreach ($apps as $app) {
+                // Clone the base query and filter by the specific app
+                $query = (clone $baseQuery)->whereHas('dataset', function ($q) use ($app) {
+                    $q->where('fintech_app_id', $app->id);
+                });
+
+                $data = $query->select(
+                        DB::raw('DATE(published_at) as date'),
+                        DB::raw('AVG(sentiment_compound) as avg_sentiment')
+                    )
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get();
+
+                $timeline = [];
+                foreach ($labels as $dateStr) {
+                    $record = $data->firstWhere('date', $dateStr);
+                    $timeline[] = $record ? round($record->avg_sentiment, 2) : null;
+                }
+
+                // Use the primary color pattern array for assigning colors in frontend, but here we just return the raw data
+                $datasets[] = [
+                    'label' => $app->name,
+                    'data' => $timeline,
+                ];
+            }
+
+            return [
+                'labels' => $labels,
+                'datasets' => $datasets,
+            ];
+        });
+    }
+
+    /**
+     * Get the 10 most recent reviews flagged as bugs across all active apps.
      */
     public function getRecentAnomalies(array $filters = [])
     {
-        return Cache::remember($this->getCacheKey('recent_anomalies', $filters), self::CACHE_TTL, function () use ($filters) {
-            $query = $this->applyFilters(Review::query(), $filters);
+        $query = $this->applyFilters(Review::query(), $filters);
 
-            return $query->with('dataset.fintechApp')
-                ->where('is_bug', true)
-                ->latest('published_at')
-                ->limit(10)
-                ->get();
-        });
+        return $query->with('dataset.fintechApp')
+            ->whereHas('dataset.fintechApp', function ($q) {
+                $q->where('is_active', true);
+            })
+            ->where('is_bug', true)
+            ->latest('published_at')
+            ->limit(10)
+            ->get();
     }
 }

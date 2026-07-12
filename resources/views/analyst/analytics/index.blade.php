@@ -14,17 +14,34 @@
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Real-time sentiment and intent analysis across your active portfolio.</p>
         </div>
         <div class="flex items-center gap-3">
-            {{-- Mock Date Picker --}}
-            <div class="hidden sm:flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                <svg class="w-4 h-4 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                Last 30 Days
-                <svg class="w-4 h-4 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            {{-- Period Filter Dropdown --}}
+            <div x-data="{ open: false }" class="relative hidden sm:block">
+                <button @click="open = !open" @click.outside="open = false" type="button"
+                    class="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <svg class="w-4 h-4 mr-2 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    @if(($period ?? '30') == '7') Last 7 Days
+                    @elseif(($period ?? '30') == '14') Last 14 Days
+                    @elseif(($period ?? '30') == '90') Last 90 Days
+                    @else Last 30 Days
+                    @endif
+                    <svg class="w-4 h-4 ml-2 text-gray-400 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                    class="absolute right-0 mt-2 w-44 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-1 overflow-hidden">
+                    @foreach(['7' => 'Last 7 Days', '14' => 'Last 14 Days', '30' => 'Last 30 Days', '90' => 'Last 90 Days'] as $val => $label)
+                        <a href="?period={{ $val }}"
+                            class="block px-4 py-2.5 text-sm transition-colors {{ ($period ?? '30') == $val ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50' }}">
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                </div>
             </div>
-            
+            @hasanyrole(['Super Admin', 'Admin', 'Analyst'])
             <x-ui.button variant="primary" href="{{ route('analyst.export.all') }}" class="shadow-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Export Report
             </x-ui.button>
+            @endhasanyrole
         </div>
     </div>
 
@@ -104,7 +121,7 @@
             <div class="h-64 w-full relative">
                 <canvas id="sentimentOverTimeChart" 
                     data-chart-labels="{{ json_encode($sentimentOverTime['labels']) }}" 
-                    data-chart-data="{{ json_encode($sentimentOverTime['data']) }}"></canvas>
+                    data-chart-data="{{ json_encode($sentimentOverTime['datasets']) }}"></canvas>
             </div>
         </div>
 
@@ -168,7 +185,9 @@
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                             {{ $review->dataset->fintechApp->name ?? '—' }}
-                            <div class="text-xs text-gray-400 font-mono mt-0.5">#{{ $review->id }}</div>
+                            <div class="text-xs text-gray-400 font-mono mt-0.5">
+                                #{{ $review->id }} &bull; {{ $review->dataset->source ?? 'Unknown Source' }}
+                            </div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 max-w-md">

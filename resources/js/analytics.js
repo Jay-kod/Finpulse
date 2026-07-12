@@ -53,29 +53,40 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const ctx = sentimentTimeCanvas.getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, `${colorAccent}60`);
-            gradient.addColorStop(1, `${colorAccent}05`);
+
+            const colors = [
+                { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)' }, // Indigo
+                { border: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' }, // Emerald
+                { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' }, // Amber
+                { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)' }, // Pink
+                { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' }, // Blue
+            ];
+
+            // 'data' is now an array of datasets
+            const chartDatasets = data.map((ds, index) => {
+                const color = colors[index % colors.length];
+                return {
+                    label: ds.label,
+                    data: ds.data,
+                    borderColor: color.border,
+                    backgroundColor: color.bg,
+                    borderWidth: 3,
+                    fill: false, // Transparent fill for multiple lines to prevent clutter
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#ffffff',
+                    pointHoverBorderColor: color.border,
+                    pointHoverBorderWidth: 2,
+                    spanGaps: true,
+                };
+            });
 
             new Chart(sentimentTimeCanvas, {
                 type: 'line',
                 data: {
                     labels: formattedLabels,
-                    datasets: [{
-                        label: 'Avg Compound Sentiment',
-                        data: data,
-                        borderColor: colorAccent,
-                        backgroundColor: gradient,
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: '#ffffff',
-                        pointHoverBorderColor: colorAccent,
-                        pointHoverBorderWidth: 2,
-                        spanGaps: true,
-                    }]
+                    datasets: chartDatasets
                 },
                 options: {
                     responsive: true,
@@ -85,7 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         mode: 'index',
                     },
                     plugins: {
-                        legend: { display: false },
+                        legend: { 
+                            display: true, // Enable legend for multiple lines
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                boxWidth: 8
+                            }
+                        },
                         tooltip: {
                             backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
                             titleColor: isDarkMode ? '#f9fafb' : '#111827',
