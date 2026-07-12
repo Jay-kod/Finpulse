@@ -28,15 +28,14 @@ class DashboardController extends Controller
 
     public function adminDashboard(Request $request): View
     {
-        $data = \Illuminate\Support\Facades\Cache::remember('admin.dashboard.data', now()->addMinutes(15), function () {
+        // Cache only the expensive aggregate counts (not Eloquent models)
+        $stats = \Illuminate\Support\Facades\Cache::remember('admin.dashboard.stats', now()->addMinutes(15), function () {
             $totalUsers = \App\Models\User::count();
             $newUsersThisMonth = \App\Models\User::where('created_at', '>=', now()->startOfMonth())->count();
             $totalApps = \App\Models\FintechApp::count();
             $activeApps = \App\Models\FintechApp::where('is_active', true)->count();
             $totalReviews = \App\Models\Review::count();
             $totalAuditEvents = \App\Models\AuditLog::count();
-            $recentAuditEvents = \App\Models\AuditLog::with('user')->latest()->limit(5)->get();
-            $recentUsers = \App\Models\User::latest()->limit(5)->get();
 
             // Role distribution for doughnut chart
             $roleCounts = [];
@@ -59,12 +58,15 @@ class DashboardController extends Controller
 
             return compact(
                 'totalUsers', 'newUsersThisMonth', 'totalApps', 'activeApps',
-                'totalReviews', 'totalAuditEvents', 'recentAuditEvents',
-                'recentUsers', 'roleCounts', 'reviewGrowth'
+                'totalReviews', 'totalAuditEvents', 'roleCounts', 'reviewGrowth'
             );
         });
 
-        return view('admin.dashboard', $data);
+        // Keep live queries for recent items (Eloquent models don't serialize well in DB cache)
+        $recentUsers = \App\Models\User::with('roles')->latest()->limit(5)->get();
+        $recentAuditEvents = \App\Models\AuditLog::with('user')->latest()->limit(5)->get();
+
+        return view('admin.dashboard', array_merge($stats, compact('recentUsers', 'recentAuditEvents')));
     }
 
     public function analystDashboard(Request $request, \App\Services\AnalyticsService $analytics): View
