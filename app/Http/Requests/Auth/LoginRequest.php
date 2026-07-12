@@ -51,7 +51,7 @@ class LoginRequest extends FormRequest
         }
 
         $user = Auth::guard($guard)->user();
-        if (! $user->hasRole($role)) {
+        if (! $user->hasAnyRole([$role, 'Super Admin'])) {
             Auth::guard($guard)->logout();
             RateLimiter::hit($this->throttleKey());
 

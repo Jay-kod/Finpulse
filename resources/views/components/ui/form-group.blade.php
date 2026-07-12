@@ -1,10 +1,15 @@
 @props([
     'label' => null,
     'for' => null,
+    'name' => null,
     'help' => null,
     'error' => null,
     'messages' => null
 ])
+
+@php
+    $for = $for ?? $name;
+@endphp
 
 <div {{ $attributes->merge(['class' => 'mb-4']) }}>
     @if($label)

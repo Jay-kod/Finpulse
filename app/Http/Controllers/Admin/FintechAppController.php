@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Validation\Rule;
 use App\Models\FintechApp;
 use App\Models\User;
 use App\Jobs\SyncAppReviewsJob;
@@ -36,7 +37,7 @@ class FintechAppController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'package_name' => 'required|string|max:255|unique:fintech_apps,package_name',
+            'package_name' => ['required', 'string', 'max:255', Rule::unique('fintech_apps', 'package_name')->whereNull('deleted_at')],
             'playstore_id' => 'nullable|string|max:255',
             'appstore_id' => 'nullable|string|max:255',
             'platform' => 'required|in:android,ios,both',
@@ -47,7 +48,17 @@ class FintechAppController extends Controller
 
         $validated['is_active'] = $request->has('is_active');
 
-        $app = FintechApp::create($validated);
+        // Check if a soft-deleted app with this package name exists
+        $app = FintechApp::withTrashed()->where('package_name', $validated['package_name'])->first();
+
+        if ($app) {
+            if ($app->trashed()) {
+                $app->restore();
+            }
+            $app->update($validated);
+        } else {
+            $app = FintechApp::create($validated);
+        }
 
         // Dispatch background job to sync initial reviews
         SyncAppReviewsJob::dispatch($app);
@@ -76,7 +87,7 @@ class FintechAppController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'package_name' => 'required|string|max:255|unique:fintech_apps,package_name,' . $fintechApp->id,
+            'package_name' => ['required', 'string', 'max:255', Rule::unique('fintech_apps', 'package_name')->ignore($fintechApp->id)->whereNull('deleted_at')],
             'playstore_id' => 'nullable|string|max:255',
             'appstore_id' => 'nullable|string|max:255',
             'platform' => 'required|in:android,ios,both',

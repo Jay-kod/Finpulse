@@ -5,14 +5,14 @@ set -e
 echo "Running composer dump-autoload..."
 composer dump-autoload --optimize
 
+echo "Running migrations..."
+php artisan migrate --force
+
 echo "Clearing caches..."
 php artisan cache:clear
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
-
-echo "Running migrations..."
-php artisan migrate --force
 
 echo "Starting Apache..."
 exec "$@"
