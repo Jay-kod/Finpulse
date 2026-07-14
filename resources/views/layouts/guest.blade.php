@@ -20,9 +20,9 @@
             <div class="absolute inset-0" style="background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 40px 40px;"></div>
             
             <div class="relative z-10 w-full max-w-lg text-white">
-                <a href="{{ url('/') }}" class="inline-flex items-center space-x-3 mb-12 hover:opacity-80 transition-opacity">
-                    <img src="{{ asset('finpulse-icon.png') }}" alt="Finpulse Logo" class="w-12 h-12 rounded-xl ring-1 ring-white/20" />
-                    <span class="text-3xl font-black tracking-tighter">Finpulse<span class="text-emerald-400">.</span></span>
+                <a href="{{ url('/') }}" class="inline-flex items-center space-x-3 mb-8 hover:opacity-80 transition-opacity">
+                    <img src="{{ asset('finpulse-icon.png') }}" alt="Finpulse Logo" class="w-10 h-10 rounded-xl ring-1 ring-white/20" />
+                    <span class="text-2xl font-black tracking-tighter">Finpulse<span class="text-emerald-400">.</span></span>
                 </a>
                 
                 @hasSection('left_panel_content')
@@ -37,25 +37,25 @@
         </div>
 
         {{-- Right Panel (Login Form) --}}
-        <div class="flex-1 flex flex-col justify-center items-center p-6 lg:p-12 relative bg-white dark:bg-[#0B0F19]">
+        <div class="flex-1 flex flex-col justify-center items-center p-6 lg:p-8 relative bg-white dark:bg-[#0B0F19]">
             <div class="absolute inset-0 bg-gradient-to-br from-white to-gray-50 dark:from-[#0B0F19] dark:to-[#080B13] -z-10"></div>
             
             {{-- Mobile Logo (visible only on small screens) --}}
-            <div class="lg:hidden flex items-center space-x-3 mb-10 w-full max-w-md">
-                <a href="{{ url('/') }}" class="inline-flex items-center space-x-3">
-                    <img src="{{ asset('finpulse-icon.png') }}" alt="Finpulse Logo" class="w-10 h-10 rounded-xl ring-1 ring-white/10 dark:ring-white/20" />
-                    <span class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">Finpulse<span class="text-emerald-400">.</span></span>
+            <div class="lg:hidden flex items-center space-x-2 mb-8 w-full max-w-sm">
+                <a href="{{ url('/') }}" class="inline-flex items-center space-x-2">
+                    <img src="{{ asset('finpulse-icon.png') }}" alt="Finpulse Logo" class="w-8 h-8 rounded-lg ring-1 ring-white/10 dark:ring-white/20" />
+                    <span class="text-xl font-black text-gray-900 dark:text-white tracking-tighter">Finpulse<span class="text-emerald-400">.</span></span>
                 </a>
             </div>
 
-            <div class="w-full max-w-md">
-                <div class="mb-10">
-                    <h2 class="text-3xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">@yield('subtitle', 'Sign in to your account')</h2>
-                    <p class="text-gray-500 dark:text-gray-400 font-medium text-lg">Enter your credentials to securely access your workspace.</p>
+            <div class="w-full max-w-sm">
+                <div class="mb-8">
+                    <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-1.5 tracking-tight">@yield('subtitle', 'Sign in to your account')</h2>
+                    <p class="text-gray-500 dark:text-gray-400 font-medium text-sm">Enter your credentials to securely access your workspace.</p>
                 </div>
 
                 {{-- Auth Card --}}
-                <div class="bg-white dark:bg-gray-900/40 rounded-[2rem] shadow-2xl border border-gray-100 dark:border-white/5 p-8 lg:p-10 backdrop-blur-xl relative overflow-hidden">
+                <div class="bg-white dark:bg-gray-900/40 rounded-2xl shadow-xl border border-gray-100 dark:border-white/5 p-6 lg:p-8 backdrop-blur-xl relative overflow-hidden">
                     {{-- Inner glow effect for auth card --}}
                     <div class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
                     

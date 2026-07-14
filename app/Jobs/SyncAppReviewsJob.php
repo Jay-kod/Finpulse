@@ -115,6 +115,18 @@ class SyncAppReviewsJob implements ShouldQueue
             ]);
         }
 
+        // Automatically trigger the NLP and ML pipelines so the new data is instantly available
+        if (!empty($newReviews)) {
+            Log::info("SyncAppReviews: Triggering ML pipeline for {$this->app->name}");
+            $limit = count($newReviews) + 50;
+            \Illuminate\Support\Facades\Artisan::call('reviews:preprocess', ['--limit' => $limit]);
+            \Illuminate\Support\Facades\Artisan::call('reviews:classify', ['--limit' => $limit]);
+            \Illuminate\Support\Facades\Artisan::call('reviews:sentiment', ['--limit' => $limit]);
+            
+            // Clear analytics cache so new data reflects immediately
+            \Illuminate\Support\Facades\Cache::flush();
+        }
+
         Log::info("SyncAppReviews: Completed sync for {$this->app->name}. Total reviews in dataset: {$totalReviews}");
     }
 

@@ -11,6 +11,8 @@ Route::get('/ui-playground', function () {
     return view('ui-playground');
 });
 
+Route::get('/p/{slug}', [\App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
+
 // Smart redirect based on role (checks all guards)
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth:web,analyst,admin', 'verified'])
@@ -91,6 +93,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::post('settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
     
     Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::resource('pages', \App\Http\Controllers\Admin\PageController::class)->only(['index', 'show', 'edit', 'update']);
 
     // App Directory (within admin guard)
     Route::get('/apps', [\App\Http\Controllers\Viewer\AppDirectoryController::class, 'index'])->name('apps.index');

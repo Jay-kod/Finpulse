@@ -24,7 +24,7 @@
         }
     </style>
 </head>
-<body class="bg-[#0B0F19] text-gray-300 relative overflow-x-hidden min-h-screen selection:bg-emerald-500/30 font-sans">
+<body class="bg-[#0B0F19] text-gray-300 relative overflow-x-hidden min-h-screen selection:bg-emerald-500/30 font-sans" x-data="{ mobileMenuOpen: false }">
     
     <!-- Background Effects -->
     <div class="fixed inset-0 bg-grid-pattern z-0 pointer-events-none opacity-50"></div>
@@ -35,30 +35,34 @@
     <header class="fixed top-0 w-full z-50 bg-[#0B0F19]/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <!-- Left Side: Site Name & Logo -->
-            <div class="flex items-center space-x-3 group cursor-pointer">
-                <div class="relative">
+            <div class="flex items-center space-x-2 md:space-x-3 group cursor-pointer">
+                <div class="relative shrink-0">
                     <div class="absolute inset-0 bg-emerald-500 blur opacity-40 group-hover:opacity-70 transition-opacity rounded-xl"></div>
-                    <img src="{{ asset('finpulse-icon.png') }}" alt="Finpulse" class="relative w-10 h-10 rounded-xl ring-1 ring-white/20">
+                    <img src="{{ asset('finpulse-icon.png') }}" alt="Finpulse" class="relative w-8 h-8 md:w-10 md:h-10 rounded-xl ring-1 ring-white/20">
                 </div>
-                <span class="text-2xl font-black text-white tracking-tighter">Finpulse<span class="text-emerald-400">.</span></span>
+                <span class="text-xl md:text-2xl font-black text-white tracking-tighter hidden sm:block">Finpulse<span class="text-emerald-400">.</span></span>
             </div>
             
             <!-- Right Side: Links & Auth Buttons -->
-            <div class="flex items-center space-x-8">
+            <div class="flex items-center md:space-x-8">
                 <nav class="hidden md:flex space-x-8">
                     <a href="#" class="text-sm font-semibold text-white transition-colors">Home</a>
                     <a href="#features" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors">Platform</a>
                     <a href="#audience" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors">Portals</a>
-                    <a href="#about" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors">About</a>
+                    <a href="{{ route('pages.show', 'about') }}" class="text-sm font-semibold text-gray-400 hover:text-white transition-colors">About</a>
                 </nav>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('login') }}" class="text-sm font-bold text-gray-300 hover:text-white transition-colors">User Login</a>
-                    <a href="{{ route('analyst.login') }}" class="relative inline-flex group">
+                <div class="flex items-center space-x-3 md:space-x-4">
+                    <a href="{{ route('login') }}" target="_blank" class="text-xs md:text-sm font-bold text-gray-300 hover:text-white transition-colors whitespace-nowrap hidden min-[360px]:block">User Login</a>
+                    <a href="{{ route('analyst.login') }}" target="_blank" class="relative inline-flex group shrink-0">
                         <div class="absolute transition-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#34D399] to-[#10B981] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200"></div>
-                        <span class="relative inline-flex items-center justify-center px-5 py-2 text-sm font-bold text-white transition-all duration-200 bg-gray-900 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900">
+                        <span class="relative inline-flex items-center justify-center px-3 py-1.5 md:px-5 md:py-2 text-xs md:text-sm font-bold text-white transition-all duration-200 bg-gray-900 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 whitespace-nowrap">
                             Analyst Portal
                         </span>
                     </a>
+                    <!-- Hamburger Button -->
+                    <button @click="mobileMenuOpen = true" class="md:hidden flex items-center justify-center p-1.5 text-gray-400 hover:text-white transition-colors focus:outline-none shrink-0 ml-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -66,23 +70,23 @@
 
     <main class="relative z-10 pt-32 pb-16">
         <!-- Hero Section -->
-        <section class="max-w-7xl mx-auto px-6 py-24 md:py-32 flex flex-col items-center text-center">
-            <div class="inline-flex items-center space-x-2 bg-white/5 border border-white/10 rounded-full px-5 py-2 mb-10 shadow-lg backdrop-blur-sm hover:bg-white/10 transition-colors cursor-pointer">
+        <section class="max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-32 flex flex-col items-center text-center">
+            <div class="inline-flex items-center space-x-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 md:px-5 md:py-2 mb-8 md:mb-10 shadow-lg backdrop-blur-sm hover:bg-white/10 transition-colors cursor-pointer">
                 <span class="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span class="text-sm font-semibold text-gray-200">Finpulse 2.0 is now live</span>
+                <span class="text-xs md:text-sm font-semibold text-gray-200">Finpulse 2.0 is now live</span>
             </div>
-            <h1 class="text-6xl md:text-8xl font-black tracking-tighter text-white mb-8 max-w-5xl leading-[1.1]">
-                Decode the Market's <br>
+            <h1 class="text-5xl sm:text-6xl md:text-8xl font-black tracking-tighter text-white mb-6 md:mb-8 max-w-5xl leading-[1.1] md:leading-[1.1]">
+                Decode the Market's <br class="hidden sm:block">
                 <span class="bg-gradient-to-r from-blue-400 via-emerald-400 to-teal-300 bg-clip-text text-transparent">True Sentiment.</span>
             </h1>
-            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mb-12 font-medium leading-relaxed">
+            <p class="text-lg sm:text-xl md:text-2xl text-gray-400 max-w-3xl mb-10 md:mb-12 font-medium leading-relaxed px-2">
                 Transform thousands of unstructured financial app reviews into crystal clear, actionable intelligence using state-of-the-art NLP models.
             </p>
-            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
-                <a href="#audience" class="px-8 py-4 rounded-xl text-lg font-bold text-gray-900 bg-emerald-400 hover:bg-emerald-300 transition-all shadow-[0_0_40px_-10px_rgba(52,211,153,0.8)] hover:shadow-[0_0_60px_-15px_rgba(52,211,153,1)] transform hover:-translate-y-1">
+            <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto px-4 sm:px-0">
+                <a href="#audience" class="w-full sm:w-auto px-8 py-4 rounded-xl text-lg font-bold text-gray-900 bg-emerald-400 hover:bg-emerald-300 transition-all shadow-[0_0_40px_-10px_rgba(52,211,153,0.8)] hover:shadow-[0_0_60px_-15px_rgba(52,211,153,1)] transform hover:-translate-y-1 text-center">
                     Select Your Portal
                 </a>
-                <a href="#features" class="px-8 py-4 rounded-xl text-lg font-bold text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-all transform hover:-translate-y-1 backdrop-blur-sm">
+                <a href="#features" class="w-full sm:w-auto px-8 py-4 rounded-xl text-lg font-bold text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-all transform hover:-translate-y-1 backdrop-blur-sm text-center">
                     Explore Features
                 </a>
             </div>
@@ -157,7 +161,7 @@
                             </div>
                         </div>
                         <div class="relative z-10 mt-auto">
-                            <a href="{{ route('login') }}" class="flex items-center justify-between w-full py-5 px-8 rounded-xl text-lg font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all shadow-lg hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.6)] group-hover:ring-2 ring-blue-400 ring-offset-2 ring-offset-[#0B0F19]">
+                            <a href="{{ route('login') }}" target="_blank" class="flex items-center justify-between w-full py-5 px-8 rounded-xl text-lg font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all shadow-lg hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.6)] group-hover:ring-2 ring-blue-400 ring-offset-2 ring-offset-[#0B0F19]">
                                 Enter Workspace
                                 <svg class="w-6 h-6 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </a>
@@ -189,7 +193,7 @@
                             </div>
                         </div>
                         <div class="relative z-10 mt-auto">
-                            <a href="{{ route('analyst.login') }}" class="flex items-center justify-between w-full py-5 px-8 rounded-xl text-lg font-bold text-gray-900 bg-emerald-400 hover:bg-emerald-300 transition-all shadow-lg hover:shadow-[0_0_30px_-5px_rgba(52,211,153,0.6)] group-hover:ring-2 ring-emerald-300 ring-offset-2 ring-offset-[#0B0F19]">
+                            <a href="{{ route('analyst.login') }}" target="_blank" class="flex items-center justify-between w-full py-5 px-8 rounded-xl text-lg font-bold text-gray-900 bg-emerald-400 hover:bg-emerald-300 transition-all shadow-lg hover:shadow-[0_0_30px_-5px_rgba(52,211,153,0.6)] group-hover:ring-2 ring-emerald-300 ring-offset-2 ring-offset-[#0B0F19]">
                                 Enter Workspace
                                 <svg class="w-6 h-6 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </a>
@@ -239,9 +243,9 @@
             <div>
                 <h4 class="text-white font-bold mb-6">Company</h4>
                 <ul class="space-y-4">
-                    <li><a href="#about" class="text-gray-500 hover:text-white transition-colors font-medium">About</a></li>
-                    <li><a href="#" class="text-gray-500 hover:text-white transition-colors font-medium">Privacy Policy</a></li>
-                    <li><a href="#" class="text-gray-500 hover:text-white transition-colors font-medium">Terms of Service</a></li>
+                    <li><a href="{{ route('pages.show', 'about') }}" class="text-gray-500 hover:text-white transition-colors font-medium">About</a></li>
+                    <li><a href="{{ route('pages.show', 'privacy-policy') }}" class="text-gray-500 hover:text-white transition-colors font-medium">Privacy Policy</a></li>
+                    <li><a href="{{ route('pages.show', 'terms-of-service') }}" class="text-gray-500 hover:text-white transition-colors font-medium">Terms of Service</a></li>
                 </ul>
             </div>
         </div>
@@ -260,5 +264,52 @@
             </div>
         </div>
     </footer>
+
+    <!-- Mobile Menu Backdrop -->
+    <div x-show="mobileMenuOpen" 
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="md:hidden fixed inset-0"
+         style="z-index: 60;"
+         @click="mobileMenuOpen = false"
+         x-cloak>
+         <div style="background-color: rgba(0, 0, 0, 0.8); width: 100%; height: 100%;"></div>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div x-show="mobileMenuOpen" 
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-300 transform"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         x-cloak
+         style="z-index: 70;"
+         class="md:hidden fixed top-0 right-0 h-full">
+        
+        <div style="background-color: #0B0F19; width: 16rem; height: 100%;" class="border-l border-white/10 shadow-2xl flex flex-col">
+            <div class="h-20 flex items-center justify-between px-6 border-b border-white/5">
+                <span class="text-xl font-black text-white tracking-tighter">Finpulse<span class="text-emerald-400">.</span></span>
+                <button @click="mobileMenuOpen = false" class="flex items-center justify-center p-1.5 text-gray-400 hover:text-white transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <nav class="flex flex-col px-6 py-8 space-y-6 flex-1">
+                <a href="#" @click="mobileMenuOpen = false" class="text-lg font-semibold text-white transition-colors">Home</a>
+                <a href="#features" @click="mobileMenuOpen = false" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors">Platform</a>
+                <a href="#audience" @click="mobileMenuOpen = false" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors">Portals</a>
+                <a href="{{ route('pages.show', 'about') }}" @click="mobileMenuOpen = false" class="text-lg font-semibold text-gray-400 hover:text-white transition-colors">About</a>
+                <div class="border-t border-white/10 pt-6 mt-2 flex flex-col space-y-4">
+                    <a href="{{ route('login') }}" target="_blank" @click="mobileMenuOpen = false" class="text-lg font-bold text-emerald-400 hover:text-emerald-300 transition-colors">User Login</a>
+                    <a href="{{ route('analyst.login') }}" target="_blank" @click="mobileMenuOpen = false" class="text-lg font-bold text-blue-400 hover:text-blue-300 transition-colors">Analyst Portal</a>
+                </div>
+            </nav>
+        </div>
+    </div>
 </body>
 </html>

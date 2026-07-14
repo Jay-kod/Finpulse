@@ -5,27 +5,27 @@
 @section('left_bg_gradient', 'from-emerald-600/30 to-teal-900/40')
 
 @section('left_panel_content')
-    <h2 class="text-4xl md:text-5xl font-black mb-6 tracking-tight text-white">Analyst Workspace</h2>
-    <p class="text-lg text-gray-300 leading-relaxed mb-10 font-medium">
+    <h2 class="text-3xl md:text-4xl font-black mb-4 tracking-tight text-white">Analyst Workspace</h2>
+    <p class="text-base text-gray-300 leading-relaxed mb-8 font-medium">
         Engineered for Data Scientists and NLP Researchers requiring deep access to raw data pipelines. Log in to manage datasets, configure data cleaning pipelines, and execute machine learning preprocessing.
     </p>
-    <div class="space-y-4">
-        <div class="flex items-center space-x-5 bg-white/5 p-5 rounded-2xl border border-white/5 backdrop-blur-md">
-            <div class="w-14 h-14 bg-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400 shrink-0">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+    <div class="space-y-3">
+        <div class="flex items-center space-x-4 bg-white/5 p-4 rounded-xl border border-white/5 backdrop-blur-md">
+            <div class="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-400 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
             </div>
             <div>
-                <h4 class="font-bold text-white text-lg">Dataset Management</h4>
-                <p class="text-gray-400 font-medium">Clean and normalize raw review data feeds.</p>
+                <h4 class="font-bold text-white text-base">Dataset Management</h4>
+                <p class="text-sm text-gray-400 font-medium">Clean and normalize raw review data feeds.</p>
             </div>
         </div>
-        <div class="flex items-center space-x-5 bg-white/5 p-5 rounded-2xl border border-white/5 backdrop-blur-md">
-            <div class="w-14 h-14 bg-teal-500/20 rounded-xl flex items-center justify-center text-teal-400 shrink-0">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+        <div class="flex items-center space-x-4 bg-white/5 p-4 rounded-xl border border-white/5 backdrop-blur-md">
+            <div class="w-10 h-10 bg-teal-500/20 rounded-lg flex items-center justify-center text-teal-400 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
             </div>
             <div>
-                <h4 class="font-bold text-white text-lg">ML Pipelines</h4>
-                <p class="text-gray-400 font-medium">Execute and monitor NLP preprocessing jobs.</p>
+                <h4 class="font-bold text-white text-base">ML Pipelines</h4>
+                <p class="text-sm text-gray-400 font-medium">Execute and monitor NLP preprocessing jobs.</p>
             </div>
         </div>
     </div>
@@ -46,17 +46,17 @@
 
         {{-- Email Address --}}
         <div>
-            <label for="email" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{{ __('Email Address') }}</label>
-            <x-ui.input id="email" class="block w-full py-3 px-4 bg-gray-50 dark:bg-gray-900/50" type="email" name="email" x-model="email" required autofocus autocomplete="username" />
+            <label for="email" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">{{ __('Email Address') }}</label>
+            <x-ui.input id="email" class="block w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-900/50 text-sm" type="email" name="email" x-model="email" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         {{-- Password --}}
         <div x-data="{ show: false }">
-            <label for="password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{{ __('Password') }}</label>
+            <label for="password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">{{ __('Password') }}</label>
             <div class="relative">
-                <x-ui.input id="password" class="block w-full py-3 px-4 bg-gray-50 dark:bg-gray-900/50 pr-12" ::type="show ? 'text' : 'password'" type="password" name="password" required autocomplete="current-password" />
-                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-500 transition-colors">
+                <x-ui.input id="password" class="block w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-900/50 pr-12 text-sm" ::type="show ? 'text' : 'password'" type="password" name="password" required autocomplete="current-password" />
+                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500 transition-colors">
                     <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -84,7 +84,7 @@
         </div>
 
         <div class="pt-2">
-            <button type="submit" x-bind:disabled="submitting" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg shadow-emerald-500/25 text-base font-bold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-[#0B0F19] transition-all disabled:opacity-75 disabled:cursor-not-allowed">
+            <button type="submit" x-bind:disabled="submitting" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-md shadow-emerald-500/25 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-[#0B0F19] transition-all disabled:opacity-75 disabled:cursor-not-allowed">
                 <span x-show="!submitting">{{ __('Sign In') }}</span>
                 <span x-show="submitting" x-cloak class="flex items-center">
                     <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

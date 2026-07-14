@@ -10,6 +10,20 @@ use Illuminate\View\View;
 class AppDirectoryController extends Controller
 {
     /**
+     * Determine the correct route name prefix based on the current URL.
+     */
+    private function getRoutePrefix(): string
+    {
+        $path = request()->path();
+        if (str_starts_with($path, 'admin/')) {
+            return 'admin';
+        } elseif (str_starts_with($path, 'analyst/')) {
+            return 'analyst';
+        }
+        return 'viewer';
+    }
+
+    /**
      * Display a listing of all tracked Fintech Apps.
      */
     public function index(): View
@@ -19,7 +33,9 @@ class AppDirectoryController extends Controller
             ->orderByDesc('downloads')
             ->get();
 
-        return view('viewer.apps.index', compact('apps'));
+        $routePrefix = $this->getRoutePrefix();
+
+        return view('viewer.apps.index', compact('apps', 'routePrefix'));
     }
 
     /**
@@ -40,13 +56,16 @@ class AppDirectoryController extends Controller
             ->take(10)
             ->get();
 
+        $routePrefix = $this->getRoutePrefix();
+
         return view('viewer.apps.show', compact(
             'app', 
             'totalReviews', 
             'goodReviews', 
             'badReviews', 
             'neutralReviews', 
-            'recentReviews'
+            'recentReviews',
+            'routePrefix'
         ));
     }
 
@@ -130,6 +149,8 @@ class AppDirectoryController extends Controller
         $avgRating = $app->reviews()->avg('rating');
         $bugCount = $app->reviews()->where('is_bug', true)->count();
 
+        $routePrefix = $this->getRoutePrefix();
+
         return view('viewer.apps.reviews', compact(
             'app',
             'reviews',
@@ -138,6 +159,7 @@ class AppDirectoryController extends Controller
             'totalReviews',
             'avgRating',
             'bugCount',
+            'routePrefix',
         ));
     }
 }

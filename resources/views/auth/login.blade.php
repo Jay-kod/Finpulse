@@ -5,27 +5,27 @@
 @section('left_bg_gradient', 'from-blue-600/30 to-blue-900/40')
 
 @section('left_panel_content')
-    <h2 class="text-4xl md:text-5xl font-black mb-6 tracking-tight text-white">Stakeholder Workspace</h2>
-    <p class="text-lg text-gray-300 leading-relaxed mb-10 font-medium">
+    <h2 class="text-3xl md:text-4xl font-black mb-4 tracking-tight text-white">Stakeholder Workspace</h2>
+    <p class="text-base text-gray-300 leading-relaxed mb-8 font-medium">
         Access your personalized dashboard to monitor high-level application performance, view beautifully rendered sentiment reports, and track real-time user satisfaction metrics without diving into complex data.
     </p>
-    <div class="space-y-4">
-        <div class="flex items-center space-x-5 bg-white/5 p-5 rounded-2xl border border-white/5 backdrop-blur-md">
-            <div class="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 shrink-0">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+    <div class="space-y-3">
+        <div class="flex items-center space-x-4 bg-white/5 p-4 rounded-xl border border-white/5 backdrop-blur-md">
+            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             </div>
             <div>
-                <h4 class="font-bold text-white text-lg">Sentiment Overview</h4>
-                <p class="text-gray-400 font-medium">Track positive, neutral, and negative trends across platforms.</p>
+                <h4 class="font-bold text-white text-base">Sentiment Overview</h4>
+                <p class="text-sm text-gray-400 font-medium">Track positive, neutral, and negative trends across platforms.</p>
             </div>
         </div>
-        <div class="flex items-center space-x-5 bg-white/5 p-5 rounded-2xl border border-white/5 backdrop-blur-md">
-            <div class="w-14 h-14 bg-cyan-500/20 rounded-xl flex items-center justify-center text-cyan-400 shrink-0">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <div class="flex items-center space-x-4 bg-white/5 p-4 rounded-xl border border-white/5 backdrop-blur-md">
+            <div class="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center text-cyan-400 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             </div>
             <div>
-                <h4 class="font-bold text-white text-lg">Feature Requests</h4>
-                <p class="text-gray-400 font-medium">See what your users want built next in real-time.</p>
+                <h4 class="font-bold text-white text-base">Feature Requests</h4>
+                <p class="text-sm text-gray-400 font-medium">See what your users want built next in real-time.</p>
             </div>
         </div>
     </div>
@@ -46,17 +46,17 @@
 
         {{-- Email Address --}}
         <div>
-            <label for="email" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{{ __('Email Address') }}</label>
-            <x-ui.input id="email" class="block w-full py-3 px-4 bg-gray-50 dark:bg-gray-900/50" type="email" name="email" x-model="email" required autofocus autocomplete="username" />
+            <label for="email" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">{{ __('Email Address') }}</label>
+            <x-ui.input id="email" class="block w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-900/50 text-sm" type="email" name="email" x-model="email" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
         {{-- Password --}}
         <div x-data="{ show: false }">
-            <label for="password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{{ __('Password') }}</label>
+            <label for="password" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5">{{ __('Password') }}</label>
             <div class="relative">
-                <x-ui.input id="password" class="block w-full py-3 px-4 bg-gray-50 dark:bg-gray-900/50 pr-12" ::type="show ? 'text' : 'password'" type="password" name="password" required autocomplete="current-password" />
-                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-500 transition-colors">
+                <x-ui.input id="password" class="block w-full py-2.5 px-3 bg-gray-50 dark:bg-gray-900/50 pr-12 text-sm" ::type="show ? 'text' : 'password'" type="password" name="password" required autocomplete="current-password" />
+                <button type="button" @click="show = !show" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500 transition-colors">
                     <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -84,7 +84,7 @@
         </div>
 
         <div class="pt-2">
-            <button type="submit" x-bind:disabled="submitting" class="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-lg shadow-blue-500/25 text-base font-bold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-[#0B0F19] transition-all disabled:opacity-75 disabled:cursor-not-allowed">
+            <button type="submit" x-bind:disabled="submitting" class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-md shadow-blue-500/25 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-[#0B0F19] transition-all disabled:opacity-75 disabled:cursor-not-allowed">
                 <span x-show="!submitting">{{ __('Sign In') }}</span>
                 <span x-show="submitting" x-cloak class="flex items-center">
                     <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

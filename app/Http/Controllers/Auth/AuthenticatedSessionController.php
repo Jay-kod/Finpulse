@@ -71,8 +71,7 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
-        
-        $request->session()->invalidate();
+
         $request->session()->regenerateToken();
 
         return redirect(route('login'));
@@ -82,7 +81,6 @@ class AuthenticatedSessionController extends Controller
     {
         Auth::guard('analyst')->logout();
 
-        $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect(route('analyst.login'));
@@ -92,7 +90,6 @@ class AuthenticatedSessionController extends Controller
     {
         Auth::guard('admin')->logout();
 
-        $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect(route('admin.login'));

@@ -26,10 +26,18 @@ class AnalyticsService
     {
         $query->where('sentiment_status', 'analyzed');
 
-        if (!empty($filters['app_id'])) {
-            $query->whereHas('dataset', function ($q) use ($filters) {
-                $q->where('fintech_app_id', $filters['app_id']);
-            });
+        // Resolve valid datasets directly to avoid heavy WHERE EXISTS subqueries on the massive reviews table
+        $activeAppIds = empty($filters['app_id']) 
+            ? \App\Models\FintechApp::where('is_active', true)->pluck('id')->toArray() 
+            : [$filters['app_id']];
+            
+        $validDatasetIds = \App\Models\Dataset::whereIn('fintech_app_id', $activeAppIds)->pluck('id')->toArray();
+
+        // If no valid datasets exist, ensure the query returns empty efficiently
+        if (empty($validDatasetIds)) {
+            $query->whereRaw('1 = 0');
+        } else {
+            $query->whereIn('dataset_id', $validDatasetIds);
         }
 
         if (!empty($filters['start_date'])) {
@@ -221,27 +229,27 @@ class AnalyticsService
                 $labels[] = $dateObj->format('Y-m-d');
             }
 
-            foreach ($apps as $app) {
-                // Clone the base query and filter by the specific app
-                $query = (clone $baseQuery)->whereHas('dataset', function ($q) use ($app) {
-                    $q->where('fintech_app_id', $app->id);
-                });
+            // Execute a single grouped query to prevent N+1 issues
+            $data = (clone $baseQuery)
+                ->join('datasets', 'reviews.dataset_id', '=', 'datasets.id')
+                ->select(
+                    'datasets.fintech_app_id',
+                    DB::raw('DATE(published_at) as date'),
+                    DB::raw('AVG(sentiment_compound) as avg_sentiment')
+                )
+                ->groupBy('datasets.fintech_app_id', 'date')
+                ->orderBy('date')
+                ->get();
 
-                $data = $query->select(
-                        DB::raw('DATE(published_at) as date'),
-                        DB::raw('AVG(sentiment_compound) as avg_sentiment')
-                    )
-                    ->groupBy('date')
-                    ->orderBy('date')
-                    ->get();
+            foreach ($apps as $app) {
+                $appData = $data->where('fintech_app_id', $app->id);
 
                 $timeline = [];
                 foreach ($labels as $dateStr) {
-                    $record = $data->firstWhere('date', $dateStr);
+                    $record = $appData->firstWhere('date', $dateStr);
                     $timeline[] = $record ? round($record->avg_sentiment, 2) : null;
                 }
 
-                // Use the primary color pattern array for assigning colors in frontend, but here we just return the raw data
                 $datasets[] = [
                     'label' => $app->name,
                     'data' => $timeline,
@@ -260,12 +268,9 @@ class AnalyticsService
      */
     public function getRecentAnomalies(array $filters = [])
     {
-        $query = $this->applyFilters(Review::query(), $filters);
+        $query = clone $this->applyFilters(Review::query(), $filters);
 
         return $query->with('dataset.fintechApp')
-            ->whereHas('dataset.fintechApp', function ($q) {
-                $q->where('is_active', true);
-            })
             ->where('is_bug', true)
             ->latest('published_at')
             ->limit(10)

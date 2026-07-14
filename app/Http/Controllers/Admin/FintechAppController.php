@@ -10,6 +10,7 @@ use App\Jobs\SyncAppReviewsJob;
 use App\Notifications\NewFintechAppAdded;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Cache;
 
 class FintechAppController extends Controller
 {
@@ -68,6 +69,8 @@ class FintechAppController extends Controller
             Notification::send($users, new NewFintechAppAdded($app));
         });
 
+        Cache::flush();
+
         return redirect()->route('admin.fintech-apps.index')
             ->with('success', 'Fintech Application created successfully. Initial sync has started.');
     }
@@ -100,6 +103,8 @@ class FintechAppController extends Controller
 
         $fintechApp->update($validated);
 
+        Cache::flush();
+
         return redirect()->route('admin.fintech-apps.index')
             ->with('success', 'Fintech Application updated successfully.');
     }
@@ -110,6 +115,8 @@ class FintechAppController extends Controller
     public function destroy(FintechApp $fintechApp)
     {
         $fintechApp->delete();
+
+        Cache::flush();
 
         return redirect()->route('admin.fintech-apps.index')
             ->with('success', 'Fintech Application deleted successfully.');

@@ -42,12 +42,23 @@
             @include('layouts.partials.topbar')
 
             <!-- Main section -->
-            <main class="flex-1 py-8 px-4 sm:px-6 lg:px-8">
-                @hasSection('breadcrumbs')
-                    @include('layouts.partials.breadcrumbs', ['breadcrumbs' => View::getSection('breadcrumbs_data', [])])
-                @endif
+            <main class="flex-1 relative" x-data="{ navigating: false }" @beforeunload.window="navigating = true" @pageshow.window="navigating = false">
+                <div x-show="!navigating" class="py-8 px-4 sm:px-6 lg:px-8">
+                    @hasSection('breadcrumbs')
+                        @include('layouts.partials.breadcrumbs', ['breadcrumbs' => View::getSection('breadcrumbs_data', [])])
+                    @endif
 
-                @yield('content')
+                    @yield('content')
+                </div>
+
+                <!-- Global Preloader -->
+                <div x-show="navigating" style="display: none;" class="absolute inset-0 z-50 flex flex-col items-center justify-start pt-32 bg-bg/50 dark:bg-dark-950/50 backdrop-blur-sm">
+                    <div class="relative flex items-center justify-center">
+                        <div class="w-16 h-16 border-4 border-primary-200 dark:border-primary-900/50 rounded-full"></div>
+                        <div class="w-16 h-16 border-4 border-primary-600 dark:border-primary-500 rounded-full border-t-transparent dark:border-t-transparent animate-spin absolute"></div>
+                    </div>
+                    <p class="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400 animate-pulse">Loading...</p>
+                </div>
             </main>
 
         </div>

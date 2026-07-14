@@ -6,9 +6,9 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     {{-- Breadcrumb --}}
     <nav class="flex items-center space-x-2 text-sm mb-6">
-        <a href="{{ route('viewer.apps.index') }}" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">App Directory</a>
+        <a href="{{ route($routePrefix . '.apps.index') }}" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">App Directory</a>
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-        <a href="{{ route('viewer.apps.show', $app) }}" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ $app->name }}</a>
+        <a href="{{ route($routePrefix . '.apps.show', $app) }}" class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ $app->name }}</a>
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         <span class="text-gray-900 dark:text-white font-medium">Reviews</span>
     </nav>
@@ -42,7 +42,7 @@
 
     {{-- Filters & Search Bar --}}
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-        <form method="GET" action="{{ route('viewer.apps.reviews', $app) }}" id="reviewFiltersForm">
+        <form method="GET" action="{{ route($routePrefix . '.apps.reviews', $app) }}" id="reviewFiltersForm">
             <div class="flex flex-col lg:flex-row lg:items-end gap-4">
                 {{-- Search --}}
                 <div class="flex-1">
@@ -134,7 +134,7 @@
                         Filter
                     </button>
                     @if(request()->hasAny(['search', 'rating', 'sentiment', 'topic', 'sort', 'dir', 'bugs_only']))
-                        <a href="{{ route('viewer.apps.reviews', $app) }}"
+                        <a href="{{ route($routePrefix . '.apps.reviews', $app) }}"
                            class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             Clear
                         </a>

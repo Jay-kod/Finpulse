@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,14 +20,31 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
 
+        // Where to send AUTHENTICATED users who hit "guest-only" routes (e.g. login pages)
         $middleware->redirectUsersTo(function (Request $request) {
-            if (Auth::guard('admin')->check()) {
+            if ($request->is('admin/*') && Auth::guard('admin')->check()) {
                 return route('admin.dashboard', absolute: false);
             }
-            if (Auth::guard('analyst')->check()) {
+            if ($request->is('analyst/*') && Auth::guard('analyst')->check()) {
                 return route('analyst.dashboard', absolute: false);
             }
-            return route('dashboard', absolute: false);
+            if (Auth::guard('web')->check()) {
+                return route('viewer.dashboard', absolute: false);
+            }
+
+            // Not actually authenticated on the relevant guard — let them through
+            return null;
+        });
+
+        // Where to send UNAUTHENTICATED users who hit protected routes
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->is('admin/*')) {
+                return route('admin.login');
+            }
+            if ($request->is('analyst/*')) {
+                return route('analyst.login');
+            }
+            return route('login');
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
